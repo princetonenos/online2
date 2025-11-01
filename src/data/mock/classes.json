@@ -1,0 +1,82 @@
+{
+  "classes": [
+    {
+      "id": "class_1",
+      "title": "Advanced Mathematics",
+      "description": "Advanced calculus and mathematical analysis for university students",
+      "teacherId": "teacher1",
+      "startAt": "2025-01-15T10:00:00Z",
+      "durationMinutes": 90,
+      "level": "advanced",
+      "resources": [
+        {
+          "id": "resource_1",
+          "type": "link",
+          "title": "Course Syllabus",
+          "url": "https://example.com/syllabus"
+        },
+        {
+          "id": "resource_2",
+          "type": "file",
+          "title": "Lecture Notes Week 1",
+          "url": "/files/lecture1.pdf"
+        }
+      ],
+      "joinLink": "/teacher/classes/class_1/join",
+      "status": "scheduled",
+      "sessions": [],
+      "createdAt": "2025-01-01T09:00:00Z",
+      "updatedAt": "2025-01-01T09:00:00Z"
+    },
+    {
+      "id": "class_2",
+      "title": "Physics Fundamentals",
+      "description": "Introduction to classical mechanics and thermodynamics",
+      "teacherId": "teacher1",
+      "startAt": "2025-01-15T14:00:00Z",
+      "durationMinutes": 120,
+      "level": "beginner",
+      "resources": [
+        {
+          "id": "resource_3",
+          "type": "link",
+          "title": "Lab Safety Guidelines",
+          "url": "https://example.com/lab-safety"
+        }
+      ],
+      "joinLink": "/teacher/classes/class_2/join",
+      "status": "scheduled",
+      "sessions": [],
+      "createdAt": "2025-01-02T10:00:00Z",
+      "updatedAt": "2025-01-02T10:00:00Z"
+    },
+    {
+      "id": "class_3",
+      "title": "Computer Science Principles",
+      "description": "Introduction to programming and computational thinking",
+      "teacherId": "teacher1",
+      "startAt": "2025-01-16T09:00:00Z",
+      "durationMinutes": 60,
+      "level": "intermediate",
+      "resources": [
+        {
+          "id": "resource_4",
+          "type": "link",
+          "title": "Python Tutorial",
+          "url": "https://example.com/python-tutorial"
+        },
+        {
+          "id": "resource_5",
+          "type": "file",
+          "title": "Assignment Template",
+          "url": "/files/assignment-template.py"
+        }
+      ],
+      "joinLink": "/teacher/classes/class_3/join",
+      "status": "scheduled",
+      "sessions": [],
+      "createdAt": "2025-01-03T11:00:00Z",
+      "updatedAt": "2025-01-03T11:00:00Z"
+    }
+  ]
+}

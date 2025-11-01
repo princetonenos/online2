@@ -1,0 +1,144 @@
+[
+  {
+    "id": "post1",
+    "courseId": "course1",
+    "authorId": "teacher1",
+    "type": "announcement",
+    "title": "Welcome to Advanced Mathematics!",
+    "content": "Hello everyone! Welcome to our Advanced Mathematics class. I'm excited to work with you all this semester. Please make sure to review the syllabus and complete the introductory assignment by Friday.",
+    "attachments": [
+      {
+        "name": "Course Syllabus.pdf",
+        "type": "pdf",
+        "url": "#",
+        "size": "2.4 MB"
+      }
+    ],
+    "topics": ["Welcome"],
+    "audience": "all",
+    "scheduled": false,
+    "createdAt": "2024-08-28T09:00:00Z",
+    "updatedAt": "2024-08-28T09:00:00Z",
+    "comments": [
+      {
+        "id": "comment1",
+        "authorId": "student1",
+        "content": "Looking forward to the class!",
+        "createdAt": "2024-08-28T10:15:00Z"
+      },
+      {
+        "id": "comment2",
+        "authorId": "student2",
+        "content": "Excited to get started!",
+        "createdAt": "2024-08-28T11:30:00Z"
+      }
+    ]
+  },
+  {
+    "id": "post2",
+    "courseId": "course1",
+    "authorId": "teacher1",
+    "type": "announcement",
+    "title": "Chapter 2 Test Next Week",
+    "content": "Just a reminder that our Chapter 2 test will be next Tuesday. Make sure to review the practice problems and attend the review session on Monday.",
+    "attachments": [
+      {
+        "name": "Chapter 2 Review.pdf",
+        "type": "pdf",
+        "url": "#",
+        "size": "1.8 MB"
+      },
+      {
+        "name": "Practice Problems.docx",
+        "type": "document",
+        "url": "#",
+        "size": "456 KB"
+      }
+    ],
+    "topics": ["Tests", "Chapter 2"],
+    "audience": "all",
+    "scheduled": false,
+    "createdAt": "2024-10-25T14:30:00Z",
+    "updatedAt": "2024-10-25T14:30:00Z",
+    "comments": []
+  },
+  {
+    "id": "post3",
+    "courseId": "course2",
+    "authorId": "teacher1",
+    "type": "announcement",
+    "title": "Project Submissions Due Friday",
+    "content": "Don't forget that your final project submissions are due this Friday at 11:59 PM. Make sure to include all required documentation and test cases.",
+    "attachments": [],
+    "topics": ["Projects", "Deadlines"],
+    "audience": "all",
+    "scheduled": false,
+    "createdAt": "2024-10-29T16:00:00Z",
+    "updatedAt": "2024-10-29T16:00:00Z",
+    "comments": [
+      {
+        "id": "comment3",
+        "authorId": "student3",
+        "content": "Will there be an extension available?",
+        "createdAt": "2024-10-29T17:45:00Z"
+      }
+    ]
+  },
+  {
+    "id": "post4",
+    "courseId": "course3",
+    "authorId": "teacher2",
+    "type": "announcement",
+    "title": "Reading Assignment Update",
+    "content": "The reading for next week has been updated. Please check the new reading list in the assignments section.",
+    "attachments": [
+      {
+        "name": "Updated Reading List.pdf",
+        "type": "pdf",
+        "url": "#",
+        "size": "890 KB"
+      }
+    ],
+    "topics": ["Reading", "Updates"],
+    "audience": "all",
+    "scheduled": false,
+    "createdAt": "2024-10-30T10:15:00Z",
+    "updatedAt": "2024-10-30T10:15:00Z",
+    "comments": []
+  },
+  {
+    "id": "post5",
+    "courseId": "course1",
+    "authorId": "student1",
+    "type": "question",
+    "title": "Help with Problem 15",
+    "content": "I'm having trouble understanding problem 15 from the homework. Can someone explain the approach?",
+    "attachments": [
+      {
+        "name": "Problem 15.jpg",
+        "type": "image",
+        "url": "#",
+        "size": "1.2 MB"
+      }
+    ],
+    "topics": ["Homework Help"],
+    "audience": "all",
+    "scheduled": false,
+    "createdAt": "2024-10-31T19:30:00Z",
+    "updatedAt": "2024-10-31T19:30:00Z",
+    "comments": [
+      {
+        "id": "comment4",
+        "authorId": "teacher1",
+        "content": "Great question! The key is to use the chain rule here. Let me walk you through it...",
+        "createdAt": "2024-10-31T20:15:00Z"
+      },
+      {
+        "id": "comment5",
+        "authorId": "student2",
+        "content": "Thanks for asking this! I was stuck on the same problem.",
+        "createdAt": "2024-10-31T21:00:00Z"
+      }
+    ]
+  }
+]

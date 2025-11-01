@@ -1,0 +1,220 @@
+{
+  "assignments": [
+    {
+      "id": "assignment1",
+      "courseId": "course1",
+      "title": "Introduction to Calculus",
+      "description": "Complete the introductory problems on limits and derivatives. Show all your work and submit as a PDF.",
+      "type": "assignment",
+      "points": 100,
+      "dueDate": "2024-09-05T23:59:00Z",
+      "topicId": "topic1",
+      "attachments": [
+        {
+          "name": "Assignment Instructions.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "1.2 MB"
+        },
+        {
+          "name": "Practice Problems.xlsx",
+          "type": "spreadsheet",
+          "url": "#",
+          "size": "345 KB"
+        }
+      ],
+      "createdAt": "2024-08-28T10:00:00Z",
+      "updatedAt": "2024-08-28T10:00:00Z"
+    },
+    {
+      "id": "assignment2",
+      "courseId": "course1",
+      "title": "Chapter 2 Quiz",
+      "description": "Online quiz covering derivatives and their applications. You have 45 minutes to complete it.",
+      "type": "quiz",
+      "points": 50,
+      "dueDate": "2024-09-12T23:59:00Z",
+      "topicId": "topic2",
+      "attachments": [],
+      "createdAt": "2024-09-05T14:30:00Z",
+      "updatedAt": "2024-09-05T14:30:00Z"
+    },
+    {
+      "id": "assignment3",
+      "courseId": "course2",
+      "title": "Programming Project: Calculator",
+      "description": "Create a simple calculator application using Python. Include basic arithmetic operations and error handling.",
+      "type": "assignment",
+      "points": 150,
+      "dueDate": "2024-09-15T23:59:00Z",
+      "topicId": "topic3",
+      "attachments": [
+        {
+          "name": "Project Requirements.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "890 KB"
+        }
+      ],
+      "createdAt": "2024-08-30T09:15:00Z",
+      "updatedAt": "2024-08-30T09:15:00Z"
+    },
+    {
+      "id": "assignment4",
+      "courseId": "course1",
+      "title": "Reading: Integration Techniques",
+      "description": "Read chapter 4 and complete the comprehension questions. Submit your answers in the discussion forum.",
+      "type": "material",
+      "points": 25,
+      "dueDate": "2024-09-08T23:59:00Z",
+      "topicId": "topic1",
+      "attachments": [
+        {
+          "name": "Chapter 4 Reading.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "3.1 MB"
+        }
+      ],
+      "createdAt": "2024-09-01T11:45:00Z",
+      "updatedAt": "2024-09-01T11:45:00Z"
+    },
+    {
+      "id": "assignment5",
+      "courseId": "course3",
+      "title": "Essay: Shakespeare's Sonnets",
+      "description": "Write a 1000-word essay analyzing the themes in Shakespeare's sonnets. Focus on sonnets 18, 29, and 116.",
+      "type": "assignment",
+      "points": 100,
+      "dueDate": "2024-09-20T23:59:00Z",
+      "topicId": "topic4",
+      "attachments": [
+        {
+          "name": "Essay Guidelines.docx",
+          "type": "document",
+          "url": "#",
+          "size": "567 KB"
+        }
+      ],
+      "createdAt": "2024-09-02T13:20:00Z",
+      "updatedAt": "2024-09-02T13:20:00Z"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "submission1",
+      "assignmentId": "assignment1",
+      "studentId": "student1",
+      "status": "graded",
+      "submittedAt": "2024-09-04T20:30:00Z",
+      "grade": 92,
+      "feedback": "Excellent work! Your solutions are clear and well-explained. Pay attention to sign conventions in problem 4.",
+      "attachments": [
+        {
+          "name": "Calculus Assignment.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "2.1 MB"
+        }
+      ],
+      "returnedAt": "2024-09-06T10:15:00Z"
+    },
+    {
+      "id": "submission2",
+      "assignmentId": "assignment1",
+      "studentId": "student2",
+      "status": "graded",
+      "submittedAt": "2024-09-05T22:45:00Z",
+      "grade": 85,
+      "feedback": "Good effort. Make sure to show all steps in your calculations.",
+      "attachments": [
+        {
+          "name": "Math Homework.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "1.8 MB"
+        }
+      ],
+      "returnedAt": "2024-09-06T11:30:00Z"
+    },
+    {
+      "id": "submission3",
+      "assignmentId": "assignment1",
+      "studentId": "student3",
+      "status": "submitted",
+      "submittedAt": "2024-09-05T23:50:00Z",
+      "grade": null,
+      "feedback": null,
+      "attachments": [
+        {
+          "name": "Assignment Submission.pdf",
+          "type": "pdf",
+          "url": "#",
+          "size": "2.3 MB"
+        }
+      ],
+      "returnedAt": null
+    },
+    {
+      "id": "submission4",
+      "assignmentId": "assignment3",
+      "studentId": "student2",
+      "status": "submitted",
+      "submittedAt": "2024-09-14T19:20:00Z",
+      "grade": null,
+      "feedback": null,
+      "attachments": [
+        {
+          "name": "Calculator Project.zip",
+          "type": "archive",
+          "url": "#",
+          "size": "4.5 MB"
+        }
+      ],
+      "returnedAt": null
+    },
+    {
+      "id": "submission5",
+      "assignmentId": "assignment2",
+      "studentId": "student4",
+      "status": "missing",
+      "submittedAt": null,
+      "grade": null,
+      "feedback": null,
+      "attachments": [],
+      "returnedAt": null
+    }
+  ],
+  "topics": [
+    {
+      "id": "topic1",
+      "courseId": "course1",
+      "name": "Introduction to Calculus",
+      "order": 1
+    },
+    {
+      "id": "topic2",
+      "courseId": "course1",
+      "name": "Derivatives",
+      "order": 2
+    },
+    {
+      "id": "topic3",
+      "courseId": "course2",
+      "name": "Python Programming",
+      "order": 1
+    },
+    {
+      "id": "topic4",
+      "courseId": "course3",
+      "name": "Shakespeare Studies",
+      "order": 1
+    },
+    {
+      "id": "topic5",
+      "courseId": "course1",
+      "name": "Integration",
+      "order": 3
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "course1",
+    "name": "Advanced Mathematics",
+    "section": "Period 1 - Fall 2024",
+    "room": "Room 201",
+    "subject": "Mathematics",
+    "color": "#20A464",
+    "code": "abc123",
+    "teachers": ["teacher1"],
+    "students": ["student1", "student2", "student3", "student4"],
+    "createdAt": "2024-08-15T10:00:00Z",
+    "updatedAt": "2024-11-01T08:00:00Z"
+  },
+  {
+    "id": "course2",
+    "name": "Computer Science Principles",
+    "section": "Period 2 - Fall 2024",
+    "room": "Computer Lab",
+    "subject": "Computer Science",
+    "color": "#F5BA14",
+    "code": "def456",
+    "teachers": ["teacher1", "teacher2"],
+    "students": ["student2", "student3", "student5", "student6"],
+    "createdAt": "2024-08-20T14:30:00Z",
+    "updatedAt": "2024-10-30T16:45:00Z"
+  },
+  {
+    "id": "course3",
+    "name": "English Literature",
+    "section": "Period 3 - Fall 2024",
+    "room": "Room 105",
+    "subject": "English",
+    "color": "#4285F4",
+    "code": "ghi789",
+    "teachers": ["teacher2"],
+    "students": ["student1", "student4", "student5"],
+    "createdAt": "2024-08-18T09:15:00Z",
+    "updatedAt": "2024-10-29T11:20:00Z"
+  },
+  {
+    "id": "course4",
+    "name": "Biology Honors",
+    "section": "Period 4 - Fall 2024",
+    "room": "Science Lab 3",
+    "subject": "Science",
+    "color": "#EA4335",
+    "code": "jkl012",
+    "teachers": ["teacher1"],
+    "students": ["student3", "student4", "student6"],
+    "createdAt": "2024-08-22T13:45:00Z",
+    "updatedAt": "2024-10-31T15:30:00Z"
+  },
+  {
+    "id": "course5",
+    "name": "World History",
+    "section": "Period 5 - Fall 2024",
+    "room": "Room 312",
+    "subject": "History",
+    "color": "#34A853",
+    "code": "mno345",
+    "teachers": ["teacher2"],
+    "students": ["student1", "student2", "student5", "student6"],
+    "createdAt": "2024-08-25T11:00:00Z",
+    "updatedAt": "2024-10-28T10:15:00Z"
+  },
+  {
+    "id": "course6",
+    "name": "Art & Design",
+    "section": "Period 6 - Fall 2024",
+    "room": "Art Studio",
+    "subject": "Arts",
+    "color": "#FBBC05",
+    "code": "pqr678",
+    "teachers": ["teacher1"],
+    "students": ["student2", "student3", "student4", "student5", "student6"],
+    "createdAt": "2024-08-28T15:20:00Z",
+    "updatedAt": "2024-10-27T14:40:00Z"
+  }
+]
