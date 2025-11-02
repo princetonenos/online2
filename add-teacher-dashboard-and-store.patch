@@ -1,0 +1,268 @@
+*** Begin Patch
+*** Add File: src/views/teacher/Dashboard.vue
++<template>
++  <div class="p-6 space-y-6">
++    <app-header :user="currentUser" />
++
++    <div class="flex items-center justify-between">
++      <h1 class="text-2xl font-semibold">Teacher dashboard</h1>
++      <div class="flex items-center gap-3">
++        <div class="text-sm text-gray-600">Next class</div>
++        <div class="text-base font-medium">{{ nextClassText }}</div>
++      </div>
++    </div>
++
++    <nav class="flex gap-3 border-b pb-3">
++      <button v-for="t in tabs" :key="t.key"
++        @click="activateTab(t.key)"
++        :class="['px-3 py-2 rounded', activeTab === t.key ? 'bg-green-50 border-b-2 border-green-600' : 'hover:bg-gray-50']">
++        {{ t.label }}
++      </button>
++    </nav>
++
++    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
++      <section class="lg:col-span-2 space-y-4">
++        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
++          <kpi-widget title="Active classes" :value="stats.activeClasses" @click.native="goToClasses" />
++          <kpi-widget title="Students" :value="stats.totalStudents" @click.native="goToStudents" />
++          <kpi-widget title="Avg. completion" :value="stats.avgCompletion + '%'" @click.native="goToStatistics" />
++        </div>
++
++        <section class="bg-white rounded shadow p-4">
++          <h3 class="font-medium mb-2">Upcoming classes</h3>
++          <ul class="space-y-2">
++            <li v-for="c in upcoming" :key="c.id" class="flex justify-between items-center">
++              <div>
++                <div class="font-medium">{{ c.title }}</div>
++                <div class="text-xs text-gray-500">{{ formatDate(c.startAt) }} • {{ c.level }}</div>
++              </div>
++              <div class="flex items-center gap-2">
++                <button class="text-sm text-blue-600" @click="joinClass(c.id)">Join</button>
++                <button class="text-sm" @click="viewClass(c.id)">View</button>
++              </div>
++            </li>
++            <li v-if="upcoming.length===0" class="text-sm text-gray-500">No upcoming classes</li>
++          </ul>
++        </section>
++      </section>
++
++      <aside class="space-y-4">
++        <div class="grid grid-cols-1 gap-4">
++          <QuickActionCard icon="plus" title="Create class" subtitle="Quick create" @click="openCreate" />
++          <QuickActionCard icon="file" title="Assignments" subtitle="View & grade" @click="goToAssignments" />
++          <QuickActionCard icon="chart" title="Statistics" subtitle="Class performance" @click="goToStatistics" />
++          <QuickActionCard icon="users" title="Students" subtitle="Manage students" @click="goToStudents" />
++        </div>
++
++        <div class="bg-white p-3 rounded shadow">
++          <div class="text-sm text-gray-600 mb-2">Quick actions</div>
++          <button class="w-full py-2 bg-green-600 text-white rounded" @click="openCreate">Create class</button>
++        </div>
++      </aside>
++    </div>
++
++    <section class="bg-white rounded shadow p-4">
++      <component :is="activeComponent" :items="tabData" @edit-student="editStudent" />
++    </section>
++
++    <CreateClassModal v-model:open="createOpen" @created="onClassCreated" />
++  </div>
++</template>
++
++<script setup>
++import { ref, computed, onMounted } from 'vue'
++import { useRouter } from 'vue-router'
++import { useTeacherClassesStore } from 'stores/teacherClasses'
++import QuickActionCard from 'components/admin/QuickActionCard.vue'
++import CreateClassModal from 'components/teacher/CreateClassModal.vue'
++import KpiWidget from 'components/admin/KPIWidget.vue'
++import AppHeader from 'components/AppHeader.vue'
++
++const ClassesListInline = {
++  props: ['items'],
++  template: `
++    <div>
++      <h3 class="font-medium mb-2">Active classes</h3>
++      <ul class="space-y-2">
++        <li v-for="c in items" :key="c.id" class="flex justify-between">
++          <div><div class="font-medium">{{ c.title }}</div><div class="text-xs text-gray-500">{{ c.startAt }}</div></div>
++          <div><router-link :to="{ name: 'TeacherClassDetail', params:{id:c.id} }" class="text-sm text-blue-600">Open</router-link></div>
++        </li>
++      </ul>
++    </div>`
++}
++
++const StudentsInline = {
++  props: ['items'],
++  template: `
++    <div>
++      <h3 class="font-medium mb-2">Students</h3>
++      <ul class="space-y-2">
++        <li v-for="s in items" :key="s.id" class="flex justify-between items-center">
++          <div>
++            <div class="font-medium">{{ s.name }}</div>
++            <div class="text-xs text-gray-500">{{ s.email }}</div>
++          </div>
++          <div>
++            <router-link :to="{ name: 'TeacherStudentDetail', params:{id:s.id} }" class="text-sm text-blue-600">Open</router-link>
++          </div>
++        </li>
++      </ul>
++    </div>`
++}
++
++const AssignmentsInline = { props:['items'], template: `<div><h3 class="font-medium mb-2">Assignments</h3><div class="text-sm text-gray-500">List & quick stats go here</div></div>` }
++const StatisticsInline = { props:['items'], template: `<div><h3 class="font-medium mb-2">Statistics</h3><div class="text-sm text-gray-500">Graphs and completion rates</div></div>` }
++
++const router = useRouter()
++const store = useTeacherClassesStore()
++const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
++const createOpen = ref(false)
++
++const tabs = [
++  { key: 'overview', label: 'Overview' },
++  { key: 'active', label: 'Active classes' },
++  { key: 'students', label: 'Students' },
++  { key: 'assignments', label: 'Assignments' },
++  { key: 'stats', label: 'Avg. completion' }
++]
++const activeTab = ref('overview')
++
++const tabComponentMap = { overview: ClassesListInline, active: ClassesListInline, students: StudentsInline, assignments: AssignmentsInline, stats: StatisticsInline }
++const activeComponent = computed(() => tabComponentMap[activeTab.value] || ClassesListInline)
++const tabData = computed(() => {
++  if (activeTab.value === 'students') return store.getStudents()
++  if (activeTab.value === 'active' || activeTab.value === 'overview') return store.active()
++  if (activeTab.value === 'assignments') return store.getAssignments()
++  return []
++})
++
++const stats = ref({ activeClasses: 0, totalStudents: 0, avgCompletion: 0 })
++const upcoming = ref([])
++
++function formatDate(ts) { try { return new Date(ts).toLocaleString() } catch { return ts } }
++async function load() { await store.fetchAll(); stats.value.activeClasses = store.active().length; stats.value.totalStudents = store.totalStudents(); stats.value.avgCompletion = store.avgCompletion(); upcoming.value = store.upcoming(5) }
++onMounted(load)
++
++function activateTab(key) {
++  activeTab.value = key
++  if (key === 'active') router.push({ name: 'TeacherClasses' })
++  if (key === 'students') router.push({ name: 'TeacherStudents' })
++  if (key === 'stats') router.push({ name: 'TeacherStatistics' })
++}
++function goToClasses() { router.push({ name: 'TeacherClasses' }) }
++function goToStudents() { router.push({ name: 'TeacherStudents' }) }
++function goToAssignments() { router.push({ name: 'TeacherAssignments' }) }
++function goToStatistics() { router.push({ name: 'TeacherStatistics' }) }
++function openCreate(){ createOpen.value = true }
++function onClassCreated(payload){ store.add(payload); createOpen.value = false; load() }
++function viewClass(id){ router.push({ name: 'TeacherClassDetail', params: { id } }) }
++function joinClass(id){ router.push({ name: 'TeacherClassJoin', params: { id } }) }
++function editStudent(id){ router.push({ name: 'TeacherStudentDetail', params: { id } }) }
++const nextClassText = computed(()=> { const next = store.upcoming(1)[0]; return next ? formatDate(next.startAt) : 'No classes' })
++</script>
++
++<style scoped></style>
++
+*** End Patch
+*** Begin Patch
+*** Add File: src/components/teacher/CreateClassModal.vue
++<template>
++  <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
++    <div class="bg-white rounded p-6 w-full max-w-lg">
++      <h3 class="text-lg font-medium mb-3">Create class</h3>
++      <form @submit.prevent="create">
++        <label class="block mb-2">
++          <div class="text-sm">Title</div>
++          <input v-model="form.title" class="w-full p-2 border rounded" required />
++        </label>
++        <label class="block mb-2">
++          <div class="text-sm">Start date & time</div>
++          <input v-model="form.startAt" type="datetime-local" class="w-full p-2 border rounded" />
++        </label>
++        <label class="block mb-2">
++          <div class="text-sm">Duration (minutes)</div>
++          <input v-model.number="form.duration" type="number" class="w-full p-2 border rounded" />
++        </label>
++        <label class="block mb-2">
++          <div class="text-sm">Level</div>
++          <select v-model="form.level" class="w-full p-2 border rounded">
++            <option value="beginner">Beginner</option>
++            <option value="intermediate">Intermediate</option>
++            <option value="advanced">Advanced</option>
++          </select>
++        </label>
++
++        <div class="flex justify-end gap-2 mt-4">
++          <button type="button" class="px-3 py-1 border rounded" @click="$emit('update:open', false)">Cancel</button>
++          <button class="px-3 py-1 bg-green-600 text-white rounded">Create</button>
++        </div>
++      </form>
++    </div>
++  </div>
++</template>
++
++<script setup>
++import { reactive } from 'vue'
++const props = defineProps({ open: Boolean })
++const emit = defineEmits(['update:open','created'])
++
++const form = reactive({ title: '', startAt: '', duration: 60, level: 'beginner' })
++
++function create(){
++  const payload = {
++    id: Date.now().toString(),
++    title: form.title || 'Untitled',
++    startAt: form.startAt || new Date().toISOString(),
++    duration: Number(form.duration),
++    level: form.level,
++    status: 'scheduled',
++    teacherId: JSON.parse(localStorage.getItem('mock:currentUser'))?.id || 't0'
++  }
++  const classes = JSON.parse(localStorage.getItem('mock:classes') || '[]')
++  classes.unshift(payload)
++  localStorage.setItem('mock:classes', JSON.stringify(classes))
++  emit('created', payload)
++}
++</script>
++
++<style scoped></style>
++
+*** End Patch
+*** Begin Patch
+*** Add File: src/stores/teacherClasses.js
++import { defineStore } from 'pinia'
++
++export const useTeacherClassesStore = defineStore('teacherClasses', {
++  state: () => ({ items: [], students: [] }),
++  actions: {
++    async fetchAll() {
++      if (!localStorage.getItem('mock:classes')) {
++        const seed = [
++          { id: 'c1', title: 'Biology 101', startAt: new Date(Date.now()+3600*1000).toISOString(), duration: 60, level:'beginner', status:'active' },
++          { id: 'c2', title: 'Maths: Fractions', startAt: new Date(Date.now()+7200*1000).toISOString(), duration: 45, level:'intermediate', status:'scheduled' }
++        ]
++        localStorage.setItem('mock:classes', JSON.stringify(seed))
++      }
++      if (!localStorage.getItem('mock:students')) {
++        const seedStudents = [
++          { id: 's1', name: 'Mark', email: 'mark@student.local', progress: 78 },
++          { id: 's2', name: 'Lily', email: 'lily@student.local', progress: 92 }
++        ]
++        localStorage.setItem('mock:students', JSON.stringify(seedStudents))
++      }
++      this.items = JSON.parse(localStorage.getItem('mock:classes') || '[]')
++      this.students = JSON.parse(localStorage.getItem('mock:students') || '[]')
++    },
++    add(c) { this.items.unshift(c); localStorage.setItem('mock:classes', JSON.stringify(this.items)) },
++    active() { return this.items.filter(x => x.status === 'active' || x.status === 'scheduled') },
++    upcoming(limit=5) { return this.items.filter(x=>new Date(x.startAt) > new Date()).slice(0,limit) },
++    findById(id){ return this.items.find(x=>x.id===id) },
++    getStudents(){ return this.students },
++    totalStudents(){ return this.students.length },
++    avgCompletion(){ if (!this.students.length) return 0; const sum = this.students.reduce((s,st)=>s+(st.progress||0),0); return Math.round(sum/this.students.length) },
++    getAssignments(){ return [] }
++  }
++})
++
+*** End Patch
