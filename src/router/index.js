@@ -1,199 +1,250 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Dashboard from '../views/Dashboard.vue'
-import TeacherDashboard from '../views/TeacherDashboard.vue'
-import CourseShell from '../views/CourseShell.vue'
-import Stream from '../views/Stream.vue'
-import Classwork from '../views/Classwork.vue'
-import People from '../views/People.vue'
-import Grades from '../views/Grades.vue'
-import AssignmentDetail from '../views/AssignmentDetail.vue'
-import LiveClass from '../views/LiveClass.vue'
-import ProfileView from '../views/ProfileView.vue'
-import StudentDashboard from '../views/student/Dashboard.vue'
 
 const routes = [
   {
     path: '/',
     name: 'Login',
-    component: () => import('../views/Login.vue')
+    component: () => import('../views/shared/Login.vue')
   },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard
-  },
+  // Teacher routes
   {
     path: '/teacher',
-    name: 'TeacherDashboard',
-    component: TeacherDashboard
+    component: () => import('../layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        redirect: { name: 'TeacherDashboard' }
+      },
+      {
+        path: 'dashboard',
+        name: 'TeacherDashboard',
+        component: () => import('../views/teacher/TeacherDashboard.vue')
+      },
+      {
+        path: 'classes',
+        name: 'TeacherClasses',
+        component: () => import('../views/teacher/ClassesList.vue')
+      },
+      {
+        path: 'classes/create',
+        name: 'TeacherClassCreate',
+        component: () => import('../views/teacher/ClassCreate.vue')
+      },
+      {
+        path: 'classes/:id',
+        name: 'TeacherClassDetail',
+        component: () => import('../views/teacher/ClassDetail.vue'),
+        props: true
+      },
+      {
+        path: 'classes/:id/live',
+        name: 'LiveSession',
+        component: () => import('../views/teacher/LiveClass.vue')
+      },
+      {
+        path: 'assignments',
+        name: 'TeacherAssignmentList',
+        component: () => import('../views/teacher/AssignmentList.vue')
+      },
+      {
+        path: 'assignments/create',
+        name: 'TeacherAssignmentCreate',
+        component: () => import('../views/teacher/AssignmentCreate.vue')
+      },
+      {
+        path: 'calendar',
+        name: 'TeacherCalendar',
+        component: () => import('../views/shared/CalendarView.vue')
+      },
+      {
+        path: 'reports',
+        name: 'TeacherReports',
+        component: () => import('../views/Reports.vue')
+      }
+    ]
   },
   // Student routes
   {
-    path: '/student/dashboard',
-    name: 'StudentDashboard',
-    component: StudentDashboard
+    path: '/student',
+    component: () => import('../layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        redirect: { name: 'StudentDashboard' }
+      },
+      {
+        path: 'dashboard',
+        name: 'StudentDashboard',
+        component: () => import('../views/student/Dashboard.vue')
+      },
+      {
+        path: 'classes',
+        name: 'StudentClasses',
+        component: () => import('../views/student/ClassList.vue')
+      },
+      {
+        path: 'classes/:id',
+        name: 'StudentClassDetail',
+        component: () => import('../views/student/ClassDetail.vue'),
+        props: true
+      },
+      {
+        path: 'join',
+        name: 'StudentJoinClass',
+        component: () => import('../views/student/JoinClass.vue')
+      },
+      {
+        path: 'classwork',
+        name: 'StudentClasswork',
+        component: () => import('../views/student/Classwork.vue')
+      },
+      {
+        path: 'classwork/:assignmentId',
+        name: 'StudentAssignmentDetail',
+        component: () => import('../views/student/AssignmentDetail.vue'),
+        props: true
+      },
+      {
+        path: 'calendar',
+        name: 'StudentCalendar',
+        component: () => import('../views/student/CalendarView.vue')
+      },
+      {
+        path: 'grades',
+        name: 'StudentGrades',
+        component: () => import('../views/student/Grades.vue')
+      },
+      {
+        path: 'people',
+        name: 'StudentPeople',
+        component: () => import('../views/student/People.vue')
+      },
+      {
+        path: 'stream',
+        name: 'StudentStream',
+        component: () => import('../views/student/Stream.vue')
+      }
+    ]
   },
+  // Admin routes
   {
-    path: '/student/classes',
-    name: 'StudentClasses',
-    component: () => import('../views/student/ClassList.vue')
+    path: '/admin',
+    component: () => import('../layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        redirect: { name: 'AdminDashboard' }
+      },
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('../views/admin/Dashboard.vue')
+      },
+      {
+        path: 'schools',
+        name: 'AdminSchools',
+        component: () => import('../views/admin/SchoolsView.vue')
+      },
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('../views/admin/UsersView.vue')
+      },
+      {
+        path: 'reports',
+        name: 'AdminReports',
+        component: () => import('../views/admin/ReportsView.vue')
+      }
+    ]
   },
-  {
-    path: '/student/classes/:id',
-    name: 'StudentClassDetail',
-    component: () => import('../views/student/ClassDetail.vue')
-  },
-  {
-    path: '/student/join',
-    name: 'StudentJoinClass',
-    component: () => import('../views/student/JoinClass.vue')
-  },
-  {
-    path: '/student/classwork',
-    name: 'StudentClasswork',
-    component: () => import('../views/student/Classwork.vue')
-  },
-  {
-    path: '/student/classwork/:assignmentId',
-    name: 'StudentAssignmentDetail',
-    component: () => import('../views/student/AssignmentDetail.vue')
-  },
-  {
-    path: '/student/calendar',
-    name: 'StudentCalendar',
-    component: () => import('../views/student/CalendarView.vue')
-  },
-  {
-    path: '/student/grades',
-    name: 'StudentGrades',
-    component: () => import('../views/student/Grades.vue')
-  },
-  {
-    path: '/student/people',
-    name: 'StudentPeople',
-    component: () => import('../views/student/People.vue')
-  },
-  {
-    path: '/student/stream',
-    name: 'StudentStream',
-    component: () => import('../views/student/Stream.vue')
-  },
+  // Course routes (nested)
   {
     path: '/course/:id',
-    component: CourseShell,
+    component: () => import('../views/CourseShell.vue'),
     children: [
       {
         path: 'stream',
         name: 'Stream',
-        component: Stream
+        component: () => import('../views/Stream.vue')
       },
       {
         path: 'classwork',
         name: 'Classwork',
-        component: Classwork
+        component: () => import('../views/Classwork.vue')
       },
       {
         path: 'people',
         name: 'People',
-        component: People
+        component: () => import('../views/People.vue')
       },
       {
         path: 'grades',
         name: 'Grades',
-        component: Grades
+        component: () => import('../views/Grades.vue')
       },
       {
         path: 'live',
         name: 'LiveClass',
-        component: LiveClass
+        component: () => import('../views/teacher/LiveClass.vue')
       }
     ]
   },
   {
     path: '/course/:id/assignments/:assignmentId',
     name: 'AssignmentDetail',
-    component: AssignmentDetail
+    component: () => import('../views/AssignmentDetail.vue'),
+    props: true
+  },
+  // Shared routes
+  {
+    path: '/profile',
+    name: 'ProfileView',
+    component: () => import('../views/shared/ProfileView.vue')
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('../views/shared/Settings.vue')
+  },
+  {
+    path: '/calendar',
+    name: 'CalendarView',
+    component: () => import('../views/shared/CalendarView.vue')
+  },
+  // Legacy routes (to be deprecated)
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/Dashboard.vue')
   },
   {
     path: '/create',
     name: 'Create',
     component: () => import('../views/Create.vue')
-  },
-  {
-    path: '/teacher/create-class',
-    name: 'ClassCreate',
-    component: () => import('../views/ClassCreate.vue')
-  },
-  {
-    path: '/teacher/classes',
-    name: 'ClassesList',
-    component: () => import('../views/ClassesList.vue')
-  },
-  {
-    path: '/teacher/classes/:id',
-    name: 'ClassDetail',
-    component: () => import('../views/ClassDetail.vue')
-  },
-  {
-    path: '/teacher/classes/:id/live',
-    name: 'LiveSession',
-    component: () => import('../views/LiveClass.vue')
-  },
-  {
-    path: '/teacher/calendar',
-    name: 'CalendarView',
-    component: () => import('../views/CalendarView.vue')
-  },
-  {
-    path: '/teacher/assignments',
-    name: 'AssignmentList',
-    component: () => import('../views/AssignmentList.vue')
-  },
-  {
-    path: '/teacher/assignments/create',
-    name: 'AssignmentCreate',
-    component: () => import('../views/AssignmentCreate.vue')
-  },
-  {
-    path: '/teacher/reports',
-    name: 'Reports',
-    component: () => import('../views/Reports.vue')
-  },
-  {
-    path: '/settings',
-    name: 'Settings',
-    component: () => import('../views/Settings.vue')
-  },
-  {
-    path: '/profile',
-    name: 'ProfileView',
-    component: ProfileView
-  },
-  {
-    path: '/calendar',
-    name: 'CalendarView',
-    component: () => import('../views/CalendarView.vue')
-  },
-  {
-    path: '/admin/schools',
-    name: 'SchoolsView',
-    component: () => import('../views/admin/SchoolsView.vue')
-  },
-  {
-    path: '/admin/users',
-    name: 'UsersView',
-    component: () => import('../views/admin/UsersView.vue')
-  },
-  {
-    path: '/admin/reports',
-    name: 'AdminReports',
-    component: () => import('../views/admin/ReportsView.vue')
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Route guard for role-based access
+router.beforeEach((to, from, next) => {
+  const user = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  
+  // Check if route requires specific role
+  if (to.path.startsWith('/teacher') && user?.role !== 'teacher') {
+    return next({ name: 'Login' })
+  }
+  if (to.path.startsWith('/student') && user?.role !== 'student') {
+    return next({ name: 'Login' })
+  }
+  if (to.path.startsWith('/admin') && user?.role !== 'admin') {
+    return next({ name: 'Login' })
+  }
+  
+  next()
 })
 
 export default router

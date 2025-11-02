@@ -262,7 +262,7 @@ const handleLogin = async () => {
 
     // Save to localStorage if remember me is checked
     if (form.rememberMe) {
-      localStorage.setItem('currentUser', JSON.stringify(user))
+      localStorage.setItem('mock:currentUser', JSON.stringify(user))
     }
 
     showToast(`Welcome back, ${user.name}!`)
@@ -270,14 +270,14 @@ const handleLogin = async () => {
     // Redirect based on role
     switch (user.role) {
       case 'admin':
-        router.push('/admin/schools')
+        router.push('/admin')
         break
       case 'teacher':
         router.push('/teacher')
         break
       case 'student':
       default:
-        router.push('/student/dashboard')
+        router.push('/student')
         break
     }
   } catch (error) {
@@ -305,7 +305,7 @@ const showToast = (message) => {
 
 onMounted(() => {
   // Check if user is already logged in
-  const savedUser = localStorage.getItem('currentUser')
+  const savedUser = localStorage.getItem('mock:currentUser')
   if (savedUser) {
     const user = JSON.parse(savedUser)
     usersStore.setCurrentUser(user)
@@ -313,14 +313,14 @@ onMounted(() => {
     // Redirect based on role
     switch (user.role) {
       case 'admin':
-        router.push('/admin/schools')
+        router.push('/admin')
         break
       case 'teacher':
         router.push('/teacher')
         break
       case 'student':
       default:
-        router.push('/student/dashboard')
+        router.push('/student')
         break
     }
   }
