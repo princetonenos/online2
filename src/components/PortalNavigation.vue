@@ -99,26 +99,29 @@ const roleBadgeClass = computed(() => {
 
 // Admin navigation items
 const adminNavItems = [
+  { name: 'Dashboard', to: { name: 'AdminDashboard' }, path: '/admin/dashboard' },
   { name: 'Calendar', to: { name: 'CalendarView' }, path: '/calendar' },
   { name: 'Profile', to: { name: 'ProfileView' }, path: '/profile' },
-  { name: 'Schools', to: { name: 'SchoolsView' }, path: '/admin/schools' },
-  { name: 'Users', to: { name: 'UsersView' }, path: '/admin/users' },
+  { name: 'Schools', to: { name: 'AdminSchools' }, path: '/admin/schools' },
+  { name: 'Users', to: { name: 'AdminUsers' }, path: '/admin/users' },
   { name: 'Reports', to: { name: 'AdminReports' }, path: '/admin/reports' },
   { name: 'Settings', to: { name: 'Settings' }, path: '/settings' }
 ]
 
 // Teacher navigation items
 const teacherNavItems = [
-  { name: 'Calendar', to: { name: 'CalendarView' }, path: '/teacher/calendar' },
+  { name: 'Dashboard', to: { name: 'TeacherDashboard' }, path: '/teacher/dashboard' },
+  { name: 'Calendar', to: { name: 'TeacherCalendar' }, path: '/teacher/calendar' },
   { name: 'Profile', to: { name: 'ProfileView' }, path: '/profile' },
-  { name: 'My Classes', to: { name: 'ClassesList' }, path: '/teacher/classes' },
-  { name: 'Assignments', to: { name: 'AssignmentList' }, path: '/teacher/assignments' },
-  { name: 'Grades', to: { name: 'Grades' }, path: '/grades' },
+  { name: 'My Classes', to: { name: 'TeacherClasses' }, path: '/teacher/classes' },
+  { name: 'Assignments', to: { name: 'TeacherAssignmentList' }, path: '/teacher/assignments' },
+  { name: 'Reports', to: { name: 'TeacherReports' }, path: '/teacher/reports' },
   { name: 'Settings', to: { name: 'Settings' }, path: '/settings' }
 ]
 
 // Student navigation items
 const studentNavItems = [
+  { name: 'Dashboard', to: { name: 'StudentDashboard' }, path: '/student/dashboard' },
   { name: 'Calendar', to: { name: 'StudentCalendar' }, path: '/student/calendar' },
   { name: 'Profile', to: { name: 'ProfileView' }, path: '/profile' },
   { name: 'My Classes', to: { name: 'StudentClasses' }, path: '/student/classes' },

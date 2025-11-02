@@ -3,29 +3,8 @@
     <!-- ARIA live region for accessibility -->
     <div aria-live="polite" aria-atomic="true" class="aria-live"></div>
     
-    <!-- Main layout for authenticated pages -->
-    <div v-if="!isLoginPage">
-      <!-- App Header -->
-      <AppHeader />
-      
-      <!-- Portal Navigation (for Admin, Teacher, Student portals) -->
-      <PortalNavigation v-if="showPortalNavigation" />
-      
-      <div class="flex h-screen" :class="showPortalNavigation ? 'pt-32' : 'pt-16'">
-        <!-- App Drawer -->
-        <AppDrawer v-if="showSidebar" />
-        
-        <!-- Main Content -->
-        <main class="flex-1 overflow-auto" :class="{ 'ml-0': !showSidebar }">
-          <router-view />
-        </main>
-      </div>
-    </div>
-    
-    <!-- Login page layout -->
-    <div v-else>
-      <router-view />
-    </div>
+    <!-- Simple router view - layouts are now handled by individual route components -->
+    <router-view />
     
     <!-- Toast notifications -->
     <div class="fixed bottom-4 right-4 z-50 space-y-2">
@@ -42,17 +21,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useUsersStore } from './store/users'
 import { useCoursesStore } from './store/courses'
 import { usePostsStore } from './store/posts'
 import { useAssignmentsStore } from './store/assignments'
-import AppHeader from './components/AppHeader.vue'
-import AppDrawer from './components/AppDrawer.vue'
-import PortalNavigation from './components/PortalNavigation.vue'
 
 const route = useRoute()
-const router = useRouter()
 const usersStore = useUsersStore()
 const coursesStore = useCoursesStore()
 const postsStore = usePostsStore()
@@ -65,45 +40,14 @@ const isLoginPage = computed(() => {
   return route.path === '/'
 })
 
-const showPortalNavigation = computed(() => {
-  const currentUser = usersStore.currentUser
-  return currentUser && (currentUser.role === 'admin' || currentUser.role === 'teacher' || currentUser.role === 'student')
-})
-
-const showSidebar = computed(() => {
-  // Show sidebar on dashboard, teacher pages, and course pages
-  return route.path === '/dashboard' || route.path.includes('/course/') || route.path.startsWith('/teacher')
-})
-
 // Load initial data
 onMounted(async () => {
   try {
     // Check if user is logged in
-    const savedUser = localStorage.getItem('currentUser')
+    const savedUser = localStorage.getItem('mock:currentUser')
     if (savedUser) {
       const user = JSON.parse(savedUser)
       usersStore.setCurrentUser(user)
-      
-      // If on login page and user is logged in, redirect to appropriate dashboard
-      if (route.path === '/') {
-        switch (user.role) {
-          case 'admin':
-            router.push('/admin/schools')
-            break
-          case 'teacher':
-            router.push('/teacher')
-            break
-          case 'student':
-          default:
-            router.push('/dashboard')
-            break
-        }
-      }
-    } else {
-      // Redirect to login if no user is logged in and not already on login page
-      if (route.path !== '/') {
-        router.push('/')
-      }
     }
 
     // Load from localStorage first, then fall back to mock data
