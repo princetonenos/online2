@@ -1,0 +1,263 @@
+*** Begin Patch
+*** Add File: src/views/Login.vue
++<template>
++  <div class="min-h-screen flex items-center justify-center p-6">
++    <div class="w-full max-w-md bg-white rounded-lg shadow p-6">
++      <h1 class="text-2xl font-semibold mb-4">Sign in</h1>
++
++      <form @submit.prevent="submit">
++        <label class="block mb-2">
++          <span class="text-sm">Email</span>
++          <input v-model="form.email" type="email" required class="w-full mt-1 p-2 border rounded"/>
++        </label>
++
++        <label class="block mb-4">
++          <span class="text-sm">Password</span>
++          <input v-model="form.password" type="password" required class="w-full mt-1 p-2 border rounded"/>
++        </label>
++
++        <div class="flex items-center justify-between mb-4">
++          <div class="flex items-center">
++            <input id="remember" type="checkbox" v-model="remember" class="mr-2"/>
++            <label for="remember" class="text-sm">Remember me</label>
++          </div>
++
++          <div class="text-sm">
++            <a @click.prevent="openForgot" href="#" class="text-blue-600">Forgot?</a>
++          </div>
++        </div>
++
++        <button
++          :disabled="loading"
++          class="w-full py-2 px-4 bg-green-600 text-white rounded hover:opacity-90"
++          type="submit"
++        >
++          <span v-if="!loading">Sign in</span>
++          <span v-else>Signing in…</span>
++        </button>
++      </form>
++
++      <p v-if="error" class="mt-4 text-sm text-red-600">{{ error }}</p>
++
++      <hr class="my-6"/>
++
++      <div class="text-sm">
++        <div class="mb-2">Test quick sign-in:</div>
++        <div class="flex gap-2">
++          <button class="px-3 py-1 border rounded" @click="quick('admin')">Admin</button>
++          <button class="px-3 py-1 border rounded" @click="quick('teacher')">Teacher</button>
++          <button class="px-3 py-1 border rounded" @click="quick('student')">Student</button>
++        </div>
++      </div>
++    </div>
++  </div>
++</template>
++
++<script setup>
++import { ref } from 'vue'
++import { useRouter } from 'vue-router'
++import { useAuth } from '../stores/auth'
++
++const router = useRouter()
++const auth = useAuth()
++
++const form = ref({ email: '', password: '' })
++const loading = ref(false)
++const error = ref('')
++const remember = ref(true)
++
++const targetByRole = {
++  admin: 'AdminDashboard',
++  teacher: 'TeacherDashboard',
++  student: 'StudentDashboard'
++}
++
++function routeExists(name) {
++  try { return router.hasRoute(name) } catch (e) { return false }
++}
++
++async function submit() {
++  loading.value = true
++  error.value = ''
++  try {
++    const user = await auth.login({ email: form.value.email, password: form.value.password })
++    if (!user) throw new Error('Login failed')
++
++    const targetName = targetByRole[user.role] || null
++    if (targetName && routeExists(targetName)) {
++      await router.push({ name: targetName })
++      return
++    }
++
++    if (routeExists('Dashboard')) {
++      await router.push({ name: 'Dashboard' })
++      return
++    }
++
++    error.value = `Signed in as ${user.role} but target route is missing. Contact admin.`
++  } catch (err) {
++    if (err?.code === 'ETIMEDOUT') error.value = 'Network timeout. Try again.'
++    else error.value = err.message || 'Failed to sign in'
++  } finally {
++    loading.value = false
++  }
++}
++
++function openForgot() {
++  if (routeExists('ForgotPassword')) router.push({ name: 'ForgotPassword' })
++  else alert('Forgot password route not found.')
++}
++
++async function quick(role) {
++  loading.value = true
++  error.value = ''
++  try {
++    const user = await auth.quickSignIn(role)
++    const target = targetByRole[user.role]
++    if (target && routeExists(target)) router.push({ name: target })
++    else router.push({ name: 'Dashboard' })
++  } catch (e) {
++    error.value = 'Quick sign-in failed'
++  } finally {
++    loading.value = false
++  }
++}
++</script>
++
++<style scoped>
++/* minimal scoped styles — adapt to your design tokens if needed */
++</style>
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: src/stores/auth.js
++import { defineStore } from 'pinia'
++
++export const useAuth = defineStore('auth', {
++  state: () => ({
++    user: JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
++  }),
++  actions: {
++    async login({ email, password }) {
++      // simulate network delay
++      await new Promise(r => setTimeout(r, 400))
++
++      // mock role selection by email content
++      let role = 'student'
++      if (email?.toLowerCase().includes('admin')) role = 'admin'
++      else if (email?.toLowerCase().includes('teacher')) role = 'teacher'
++
++      const user = { id: Date.now(), name: (email && email.split('@')[0]) || 'User', email, role }
++      this.user = user
++      localStorage.setItem('mock:currentUser', JSON.stringify(user))
++      return user
++    },
++    quickSignIn(role = 'student') {
++      const user = { id: Date.now(), name: `${role}-dev`, email: `${role}@dev.local`, role }
++      this.user = user
++      localStorage.setItem('mock:currentUser', JSON.stringify(user))
++      return Promise.resolve(user)
++    },
++    logout() {
++      this.user = null
++      localStorage.removeItem('mock:currentUser')
++    }
++  },
++  getters: {
++    isTeacher: (s) => s.user?.role === 'teacher',
++    isAdmin: (s) => s.user?.role === 'admin',
++    isStudent: (s) => s.user?.role === 'student'
++  }
++})
++
+*** End Patch
+
+*** Begin Patch
+*** Add File: src/router/index.js
++import { createRouter, createWebHistory } from 'vue-router'
++
++// core app routes - adjust / extend as your project needs
++const routes = [
++  // auth
++  { path: '/', name: 'Home', redirect: '/login' },
++  { path: '/login', name: 'Login', component: () => import('../views/Login.vue') },
++
++  // admin parent
++  {
++    path: '/admin',
++    component: () => import('../layouts/MainLayout.vue').catch(() => import('../App.vue')),
++    children: [
++      { path: '', redirect: { name: 'AdminDashboard' } },
++      { path: 'dashboard', name: 'AdminDashboard', component: () => import('../views/admin/Dashboard.vue') },
++      { path: 'users', name: 'AdminUsers', component: () => import('../views/admin/UsersList.vue') },
++      { path: 'users/create', name: 'AdminUserCreate', component: () => import('../views/admin/UserCreate.vue') },
++      { path: 'users/:id/edit', name: 'AdminUserEdit', component: () => import('../views/admin/UserEdit.vue'), props: true },
++      { path: 'roles', name: 'AdminRoles', component: () => import('../views/admin/Roles.vue') },
++      { path: 'schools', name: 'AdminSchools', component: () => import('../views/admin/SchoolsList.vue') },
++      { path: 'classes', name: 'AdminClasses', component: () => import('../views/admin/ClassesList.vue') },
++      { path: 'classes/:id', name: 'AdminClassDetail', component: () => import('../views/admin/ClassDetail.vue'), props: true },
++      { path: 'assignments/moderation', name: 'AdminAssignmentsModeration', component: () => import('../views/admin/AssignmentsModeration.vue') },
++      { path: 'enrollments', name: 'AdminEnrollments', component: () => import('../views/admin/Enrollments.vue') },
++      { path: 'reports', name: 'AdminReports', component: () => import('../views/admin/Reports.vue') },
++      { path: 'logs', name: 'AdminLogs', component: () => import('../views/admin/Logs.vue') },
++      { path: 'settings', name: 'AdminSettings', component: () => import('../views/admin/Settings.vue') }
++    ]
++  },
++
++  // teacher parent
++  {
++    path: '/teacher',
++    component: () => import('../layouts/MainLayout.vue').catch(() => import('../App.vue')),
++    children: [
++      { path: '', redirect: { name: 'TeacherDashboard' } },
++      { path: 'dashboard', name: 'TeacherDashboard', component: () => import('../views/teacher/Dashboard.vue') },
++      { path: 'classes', name: 'TeacherClasses', component: () => import('../views/teacher/ClassesList.vue') },
++      { path: 'classes/create', name: 'TeacherClassCreate', component: () => import('../views/teacher/ClassCreate.vue') },
++      { path: 'classes/:id', name: 'TeacherClassDetail', component: () => import('../views/teacher/ClassDetail.vue'), props: true },
++      { path: 'calendar', name: 'TeacherCalendar', component: () => import('../views/teacher/CalendarView.vue') }
++    ]
++  },
++
++  // student parent
++  {
++    path: '/student',
++    component: () => import('../layouts/MainLayout.vue').catch(() => import('../App.vue')),
++    children: [
++      { path: '', redirect: { name: 'StudentDashboard' } },
++      { path: 'dashboard', name: 'StudentDashboard', component: () => import('../views/student/Dashboard.vue') },
++      { path: 'classes', name: 'StudentClasses', component: () => import('../views/student/EnrolledClasses.vue') },
++      { path: 'classes/:id', name: 'StudentClassDetail', component: () => import('../views/student/ClassDetail.vue'), props: true },
++      { path: 'calendar', name: 'StudentCalendar', component: () => import('../views/student/CalendarView.vue') }
++    ]
++  },
++
++  // fallback
++  { path: '/:pathMatch(.*)*', name: 'NotFound', component: () => import('../views/NotFound.vue').catch(() => import('../views/Dashboard.vue')) }
++]
++
++const router = createRouter({
++  history: createWebHistory(),
++  routes
++})
++
++// role guard
++router.beforeEach((to, from, next) => {
++  const user = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
++
++  if (to.path.startsWith('/admin') && user?.role !== 'admin') {
++    return next({ name: 'Login' })
++  }
++  if (to.path.startsWith('/teacher') && user?.role !== 'teacher') {
++    return next({ name: 'Login' })
++  }
++  if (to.path.startsWith('/student') && user?.role !== 'student') {
++    return next({ name: 'Login' })
++  }
++
++  next()
++})
++
++export default router
++
+*** End Patch
