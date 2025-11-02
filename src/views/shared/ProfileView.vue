@@ -203,7 +203,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useUsersStore } from '../store/users'
+import { useUsersStore } from '../../store/users'
 
 const usersStore = useUsersStore()
 

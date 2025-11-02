@@ -431,8 +431,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useClassesStore } from '../store/classes'
-import { useUsersStore } from '../store/users'
+import { useClassesStore } from '../../store/classes'
+import { useUsersStore } from '../../store/users'
 
 const router = useRouter()
 const classesStore = useClassesStore()

@@ -161,7 +161,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUsersStore } from '../store/users'
+import { useUsersStore } from '../../store/users'
 
 const router = useRouter()
 const usersStore = useUsersStore()
@@ -270,14 +270,14 @@ const handleLogin = async () => {
     // Redirect based on role
     switch (user.role) {
       case 'admin':
-        router.push('/admin')
+        router.push({ name: 'AdminDashboard' })
         break
       case 'teacher':
-        router.push('/teacher')
+        router.push({ name: 'TeacherDashboard' })
         break
       case 'student':
       default:
-        router.push('/student')
+        router.push({ name: 'StudentDashboard' })
         break
     }
   } catch (error) {

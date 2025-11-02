@@ -363,9 +363,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAssignmentsStore } from '../store/assignments'
-import { useCoursesStore } from '../store/courses'
-import { useUsersStore } from '../store/users'
+import { useAssignmentsStore } from '../../store/assignments'
+import { useCoursesStore } from '../../store/courses'
+import { useUsersStore } from '../../store/users'
 
 const router = useRouter()
 const assignmentsStore = useAssignmentsStore()

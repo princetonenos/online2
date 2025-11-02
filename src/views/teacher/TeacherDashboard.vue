@@ -238,8 +238,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUsersStore } from '../store/users'
-import { useCoursesStore } from '../store/courses'
+import { useUsersStore } from '../../store/users'
+import { useCoursesStore } from '../../store/courses'
 
 const router = useRouter()
 const usersStore = useUsersStore()

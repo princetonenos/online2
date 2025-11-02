@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@school.edu",
+    "role": "teacher",
+    "school": "Main Campus",
+    "status": "active",
+    "avatar": "/avatars/teacher1.jpg",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Alex Rodriguez",
+    "email": "alex.rodriguez@student.edu",
+    "role": "student",
+    "school": "Main Campus",
+    "status": "active",
+    "avatar": "/avatars/student1.jpg",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Admin User",
+    "email": "admin@school.edu",
+    "role": "admin",
+    "school": "Main Campus",
+    "status": "active",
+    "avatar": "/avatars/admin1.jpg",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Michael Brown",
+    "email": "michael.brown@school.edu",
+    "role": "teacher",
+    "school": "North Campus",
+    "status": "active",
+    "avatar": "/avatars/teacher2.jpg",
+    "createdAt": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "Emily Davis",
+    "email": "emily.davis@school.edu",
+    "role": "teacher",
+    "school": "South Campus",
+    "status": "inactive",
+    "avatar": "/avatars/teacher3.jpg",
+    "createdAt": "2024-01-01T00:00:00Z"
+  }
+]

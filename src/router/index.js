@@ -141,19 +141,66 @@ const routes = [
         component: () => import('../views/admin/Dashboard.vue')
       },
       {
-        path: 'schools',
-        name: 'AdminSchools',
-        component: () => import('../views/admin/SchoolsView.vue')
-      },
-      {
         path: 'users',
         name: 'AdminUsers',
-        component: () => import('../views/admin/UsersView.vue')
+        component: () => import('../views/admin/UsersList.vue')
+      },
+      {
+        path: 'users/create',
+        name: 'AdminUserCreate',
+        component: () => import('../views/admin/UserCreate.vue')
+      },
+      {
+        path: 'users/:id/edit',
+        name: 'AdminUserEdit',
+        component: () => import('../views/admin/UserEdit.vue'),
+        props: true
+      },
+      {
+        path: 'roles',
+        name: 'AdminRoles',
+        component: () => import('../views/admin/Roles.vue')
+      },
+      {
+        path: 'schools',
+        name: 'AdminSchools',
+        component: () => import('../views/admin/SchoolsList.vue')
+      },
+      {
+        path: 'classes',
+        name: 'AdminClasses',
+        component: () => import('../views/admin/ClassesList.vue')
+      },
+      {
+        path: 'classes/:id',
+        name: 'AdminClassDetail',
+        component: () => import('../views/admin/ClassDetail.vue'),
+        props: true
+      },
+      {
+        path: 'assignments/moderation',
+        name: 'AdminAssignmentsModeration',
+        component: () => import('../views/admin/AssignmentsModeration.vue')
+      },
+      {
+        path: 'enrollments',
+        name: 'AdminEnrollments',
+        component: () => import('../views/admin/Enrollments.vue')
       },
       {
         path: 'reports',
         name: 'AdminReports',
-        component: () => import('../views/admin/ReportsView.vue')
+        component: () => import('../views/admin/Reports.vue')
+      },
+      {
+        path: 'logs',
+        name: 'AdminLogs',
+        component: () => import('../views/admin/Logs.vue')
+      },
+      {
+        path: 'settings',
+        name: 'AdminSettings',
+        component: () => import('../views/admin/Settings.vue')
       }
     ]
   },

@@ -76,7 +76,7 @@ export const useUsersStore = defineStore('users', {
 
     persistCurrentUser() {
       if (typeof window !== 'undefined' && this.currentUser) {
-        localStorage.setItem('currentUser', JSON.stringify(this.currentUser))
+        localStorage.setItem('mock:currentUser', JSON.stringify(this.currentUser))
       }
     },
 
@@ -89,7 +89,7 @@ export const useUsersStore = defineStore('users', {
     loadFromStorage() {
       if (typeof window !== 'undefined') {
         const storedUsers = localStorage.getItem('users')
-        const storedCurrentUser = localStorage.getItem('currentUser')
+        const storedCurrentUser = localStorage.getItem('mock:currentUser')
         
         if (storedUsers) {
           this.users = JSON.parse(storedUsers)
@@ -100,9 +100,8 @@ export const useUsersStore = defineStore('users', {
         if (storedCurrentUser) {
           this.currentUser = JSON.parse(storedCurrentUser)
         } else {
-          // Default to first teacher user
-          const defaultUser = usersData.find(user => user.role === 'teacher') || usersData[0]
-          this.currentUser = defaultUser
+          // Don't set a default user - let login handle it
+          this.currentUser = null
         }
       }
     }

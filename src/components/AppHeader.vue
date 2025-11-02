@@ -160,8 +160,8 @@ const switchUser = (userId) => {
 
 const handleLogout = () => {
   // Clear current user from store and localStorage
-  usersStore.setCurrentUser(null)
-  localStorage.removeItem('currentUser')
+  usersStore.currentUser = null
+  localStorage.removeItem('mock:currentUser')
   
   showToast('You have been logged out')
   showUserMenu.value = false
