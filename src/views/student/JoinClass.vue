@@ -1,63 +1,21 @@
 <template>
-  <div class="p-6 max-w-2xl mx-auto">
-    <!-- Header -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-medium text-classroom-gray-900 mb-2">Join a Class</h1>
-      <p class="text-classroom-gray-600">Enter the class code provided by your teacher</p>
-    </div>
+  <div class="p-6 max-w-xl mx-auto">
+    <h2 class="text-xl font-semibold mb-4">Join class</h2>
 
-    <!-- Join Form -->
-    <div class="bg-white rounded-classroom classroom-shadow p-6">
-      <form @submit.prevent="joinClass" class="space-y-6">
-        <div>
-          <label for="classCode" class="block text-sm font-medium text-classroom-gray-900 mb-2">
-            Class Code
-          </label>
-          <input
-            id="classCode"
-            v-model="classCode"
-            type="text"
-            required
-            placeholder="Enter class code (e.g., abc-def-123)"
-            class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
-            :class="{ 'border-red-500': error }"
-          >
-          <p v-if="error" class="text-red-500 text-xs mt-1">{{ error }}</p>
-          <p class="text-sm text-classroom-gray-500 mt-1">
-            Ask your teacher for the class code, then enter it here.
-          </p>
-        </div>
+    <form @submit.prevent="join">
+      <label class="block mb-3">
+        <div class="text-sm text-gray-600 mb-1">Class code or ID</div>
+        <input v-model="code" required class="w-full p-2 border rounded" placeholder="Enter class code or id"/>
+      </label>
 
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full bg-classroom-primary hover:bg-classroom-primary-dark text-white py-3 px-4 rounded-classroom transition-colors font-medium focus-classroom flex items-center justify-center space-x-2"
-          :class="{ 'opacity-50 cursor-not-allowed': loading }"
-        >
-          <span v-if="loading" class="material-icons animate-spin">refresh</span>
-          <span>{{ loading ? 'Joining...' : 'Join Class' }}</span>
-        </button>
-      </form>
-    </div>
-
-    <!-- Demo classes -->
-    <div class="mt-8">
-      <h2 class="text-xl font-medium text-classroom-gray-900 mb-4">Available Demo Classes</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div 
-          v-for="demoClass in demoClasses"
-          :key="demoClass.code"
-          class="bg-white rounded-classroom classroom-shadow p-4 border border-classroom-gray-200 hover:border-classroom-primary transition-colors cursor-pointer"
-          @click="classCode = demoClass.code"
-        >
-          <h3 class="font-medium text-classroom-gray-900 mb-1">{{ demoClass.name }}</h3>
-          <p class="text-sm text-classroom-gray-600 mb-2">{{ demoClass.teacher }}</p>
-          <div class="flex items-center justify-between text-xs text-classroom-gray-500">
-            <span>Code: {{ demoClass.code }}</span>
-            <span>{{ demoClass.students }} students</span>
-          </div>
-        </div>
+      <div class="flex items-center gap-2">
+        <button type="submit" class="px-4 py-2 bg-classroom-primary text-white rounded">Join</button>
+        <button type="button" class="px-3 py-2 border rounded" @click="cancel">Cancel</button>
       </div>
+    </form>
+
+    <div v-if="message" class="mt-4 text-sm" :class="messageType==='ok' ? 'text-green-600' : 'text-red-600'">
+      {{ message }}
     </div>
   </div>
 </template>
@@ -65,65 +23,50 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCoursesStore } from '../../store/courses'
-import { useUsersStore } from '../../store/users'
 
 const router = useRouter()
-const coursesStore = useCoursesStore()
-const usersStore = useUsersStore()
+const code = ref('')
+const message = ref('')
+const messageType = ref('')
 
-const classCode = ref('')
-const loading = ref(false)
-const error = ref('')
+function findClassByCode(c) {
+  const classes = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+  // try to match id first, then a code field if present
+  return classes.find(x => String(x.id) === String(c) || (x.code && String(x.code) === String(c)))
+}
 
-const demoClasses = [
-  { code: 'math-101', name: 'Mathematics 101', teacher: 'Dr. Johnson', students: 24 },
-  { code: 'science-202', name: 'Science Fundamentals', teacher: 'Ms. Davis', students: 18 },
-  { code: 'history-301', name: 'World History', teacher: 'Mr. Thompson', students: 22 },
-  { code: 'english-102', name: 'English Literature', teacher: 'Mrs. Wilson', students: 20 }
-]
-
-const joinClass = async () => {
-  if (!classCode.value.trim()) {
-    error.value = 'Please enter a class code'
+function join() {
+  if (!code.value.trim()) {
+    messageType.value = 'err'
+    message.value = 'Enter a valid code or id'
     return
   }
-
-  loading.value = true
-  error.value = ''
-
-  try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Find course by code
-    const course = coursesStore.courses.find(c => c.code === classCode.value.trim().toLowerCase())
-    
-    if (!course) {
-      error.value = 'Class not found. Please check the code and try again.'
-      return
-    }
-
-    // Add user to course (in a real app, this would be an API call)
-    const currentUser = usersStore.currentUser
-    if (currentUser && !course.enrolledStudents.includes(currentUser.id)) {
-      course.enrolledStudents.push(currentUser.id)
-      coursesStore.saveToStorage()
-    }
-
-    showToast(`Successfully joined ${course.name}!`)
-    router.push('/student/dashboard')
-  } catch (err) {
-    console.error('Error joining class:', err)
-    error.value = 'An error occurred while joining the class. Please try again.'
-  } finally {
-    loading.value = false
+  const cls = findClassByCode(code.value.trim())
+  if (!cls) {
+    messageType.value = 'err'
+    message.value = 'Class not found. Check the code or id'
+    return
   }
+  // demo behavior: add current student to class.students if not present
+  const current = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  if (!current || current.role !== 'student') {
+    messageType.value = 'err'
+    message.value = 'You must be signed in as a student to join'
+    return
+  }
+  cls.students = cls.students || []
+  if (!cls.students.includes(current.id)) cls.students.push(current.id)
+  // persist
+  const all = JSON.parse(localStorage.getItem('mock:classes') || '[]').map(x => x.id === cls.id ? cls : x)
+  localStorage.setItem('mock:classes', JSON.stringify(all))
+  messageType.value = 'ok'
+  message.value = 'Joined successfully'
+  setTimeout(()=> router.push({ name: 'StudentClasses' }).catch(()=>router.push('/student/classes')), 700)
 }
 
-const showToast = (message) => {
-  if (window.showToast) {
-    window.showToast(message)
-  }
-}
+function cancel(){ router.back() }
 </script>
+
+<style scoped>
+/* minimal styling so this matches existing app styles */
+</style>

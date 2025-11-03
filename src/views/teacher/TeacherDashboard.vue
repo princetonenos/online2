@@ -299,7 +299,7 @@ function activateTab(key) {
 
 function goToClasses() { router.push({ name: 'TeacherClasses' }) }
 function goToStudents() { router.push({ name: 'TeacherStudents' }) }
-function goToAssignments() { router.push({ name: 'TeacherAssignmentList' }) }
+function goToAssignments() { router.push({ name: 'TeacherAssignments' }) }
 function goToCalendar() { router.push({ name: 'TeacherCalendar' }) }
 function goToStatistics() { router.push({ name: 'TeacherStatistics' }) }
 

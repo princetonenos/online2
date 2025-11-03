@@ -77,9 +77,9 @@
     </div>
 
     <!-- Quick actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <button 
-        @click="router.push('/student/join')"
+        @click="router.push({ name: 'StudentJoinClass' })"
         class="p-4 bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-colors text-left group focus-classroom"
       >
         <div class="flex items-center space-x-3">
@@ -94,12 +94,27 @@
       </button>
 
       <button 
-        @click="router.push('/student/classwork')"
+        @click="router.push('/student/classes')"
         class="p-4 bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-colors text-left group focus-classroom"
       >
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-classroom-secondary bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-secondary">assignment</span>
+            <span class="material-icons text-classroom-secondary">school</span>
+          </div>
+          <div>
+            <h3 class="font-medium text-classroom-gray-900">View classes</h3>
+            <p class="text-sm text-classroom-gray-500">See all your classes</p>
+          </div>
+        </div>
+      </button>
+
+      <button 
+        @click="router.push('/student/classwork')"
+        class="p-4 bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-colors text-left group focus-classroom"
+      >
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-classroom-support bg-opacity-10 rounded-classroom flex items-center justify-center">
+            <span class="material-icons text-classroom-support">assignment</span>
           </div>
           <div>
             <h3 class="font-medium text-classroom-gray-900">View classwork</h3>
@@ -113,8 +128,8 @@
         class="p-4 bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-colors text-left group focus-classroom"
       >
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-classroom-support bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-support">calendar_today</span>
+          <div class="w-10 h-10 bg-classroom-warning bg-opacity-10 rounded-classroom flex items-center justify-center">
+            <span class="material-icons text-classroom-warning">calendar_today</span>
           </div>
           <div>
             <h3 class="font-medium text-classroom-gray-900">View calendar</h3>
