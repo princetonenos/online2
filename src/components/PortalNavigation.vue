@@ -114,7 +114,7 @@ const teacherNavItems = [
   { name: 'Calendar', to: { name: 'TeacherCalendar' }, path: '/teacher/calendar' },
   { name: 'Profile', to: { name: 'ProfileView' }, path: '/profile' },
   { name: 'My Classes', to: { name: 'TeacherClasses' }, path: '/teacher/classes' },
-  { name: 'Assignments', to: { name: 'TeacherAssignmentList' }, path: '/teacher/assignments' },
+  { name: 'Assignments', to: { name: 'TeacherAssignmentList' }, path: '/teacher/assignmentscard' },
   { name: 'Reports', to: { name: 'TeacherReports' }, path: '/teacher/reports' },
   { name: 'Settings', to: { name: 'Settings' }, path: '/settings' }
 ]

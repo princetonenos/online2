@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+ROUTER="src/router/index.js"
+echo "1) Check vite alias exists"
+node -e "const fs=require('fs'); const c=fs.readFileSync('vite.config.js','utf8'); console.log(/alias.*@/.test(c)?'ok':'missing @ alias in vite.config.js')"
+
+echo
+echo "2) List teacher routes in router"
+grep -n "path: '/teacher" $ROUTER || true
+grep -n "name: 'Teacher" $ROUTER || true
+
+echo
+echo "3) Find unresolved imports in teacher views"
+grep -R --line-number "import .* from .*components/teacher" src | sed -n '1,200p' || true
+
+echo
+echo "4) Verify imported files exist (teacher views)"
+grep -oE "from ['\"][^'\"]+components/teacher/[^'\"]+['\"]" src | sed -E "s/from ['\"](.+)['\"]/\1/" | while read -r imp; do
+  path="${imp//@\//src/}"
+  if [[ "$path" != *.vue ]]; then path="${path}.vue"; fi
+  if [ -f "$path" ]; then echo "OK $path"; else echo "MISSING $path"; fi
+done

@@ -9,7 +9,7 @@ const routes = [
   // Teacher routes
   {
     path: '/teacher',
-    component: () => import('../layouts/MainLayout.vue'),
+    component: () => import('../views/teacher/TeacherDashboard.vue'),
     children: [
       {
         path: '',
@@ -91,7 +91,7 @@ const routes = [
   // Student routes
   {
     path: '/student',
-    component: () => import('../layouts/MainLayout.vue'),
+    component: () => import('../views/student/Dashboard.vue'),
     children: [
       {
         path: '',
@@ -154,7 +154,7 @@ const routes = [
   // Admin routes
   {
     path: '/admin',
-    component: () => import('../layouts/MainLayout.vue'),
+    component: () => import('../views/admin/Dashboard.vue'),
     children: [
       {
         path: '',

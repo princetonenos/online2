@@ -4,7 +4,7 @@
 
     <!-- Page header -->
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Teacher Dashboard</h1>
+      <h1 class="text-2xl font-semibold">Teacher dashboard</h1>
       <div class="flex items-center gap-3">
         <div class="text-sm text-gray-600">Next class</div>
         <div class="text-base font-medium">{{ nextClassText }}</div>
@@ -100,58 +100,64 @@
       </section>
 
       <aside class="space-y-4">
-        <!-- My Classes Panel -->
-        <MyClassesPanel @create="openCreate" @view="viewClass" @open-all="goToClasses" />
+        <!-- Quick actions (replace existing) -->
+        <div class="grid grid-cols-2 gap-4 quick-grid">
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <button class="w-full bg-white rounded shadow p-3 flex items-start gap-3" @click="openCreateCourse">
+              <svg width="28" height="28" viewBox="0 0 24 24" class="text-green-600" style="flex-shrink:0">
+                <path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              <div class="text-left">
+                <div class="text-sm font-medium">Create course</div>
+                <div class="text-xs text-gray-500">Add a new course</div>
+              </div>
+            </button>
+          </div>
 
-        <div class="quick-grid">
           <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
-            <QuickActionCard icon="➕" title="Create class" subtitle="Quick create" @click="openCreate" />
+            <button class="w-full bg-white rounded shadow p-3 flex items-start gap-3" @click="openAddEvent">
+              <svg width="28" height="28" viewBox="0 0 24 24" class="text-blue-600" style="flex-shrink:0">
+                <path d="M3 8h18M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <path d="M16 2v4M8 2v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <div class="text-left">
+                <div class="text-sm font-medium">Add event</div>
+                <div class="text-xs text-gray-500">Schedule in calendar</div>
+              </div>
+            </button>
           </div>
-          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
-            <QuickActionCard icon="📚" title="My classes" subtitle="View & manage" @click="goToClasses" />
-          </div>
-          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
-            <QuickActionCard icon="📝" title="Assignments" subtitle="View & grade" @click="goToAssignments" />
-          </div>
-          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
-            <QuickActionCard icon="📅" title="Calendar" subtitle="Schedule events" @click="goToCalendar" />
-          </div>
-        </div>
 
-        <div class="bg-white p-4 rounded shadow">
-          <div class="text-sm font-medium text-gray-700 mb-3">Quick stats</div>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-600">Total classes:</span>
-              <span class="font-medium">{{ stats.activeClasses }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Total students:</span>
-              <span class="font-medium">{{ stats.totalStudents }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Avg. progress:</span>
-              <span class="font-medium">{{ stats.avgCompletion }}%</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600">Pending grading:</span>
-              <span class="font-medium text-orange-600">{{ stats.pendingGrading }}</span>
-            </div>
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <button class="w-full bg-white rounded shadow p-3 flex items-start gap-3" @click="openCreateStudent">
+              <svg width="28" height="28" viewBox="0 0 24 24" class="text-indigo-600" style="flex-shrink:0">
+                <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 20a9 9 0 0 1 18 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              <div class="text-left">
+                <div class="text-sm font-medium">Create student</div>
+                <div class="text-xs text-gray-500">Enroll a new student</div>
+              </div>
+            </button>
+          </div>
+
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <button class="w-full bg-white rounded shadow p-3 flex items-start gap-3" @click="goToAssignments">
+              <svg width="28" height="28" viewBox="0 0 24 24" class="text-yellow-600" style="flex-shrink:0">
+                <path d="M8 2h8l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              </svg>
+              <div class="text-left">
+                <div class="text-sm font-medium">Assignments</div>
+                <div class="text-xs text-gray-500">View & grade</div>
+              </div>
+            </button>
           </div>
         </div>
 
         <div class="bg-white p-3 rounded shadow">
           <div class="text-sm text-gray-600 mb-2">Quick actions</div>
-          <div class="space-y-2">
-            <button class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700" @click="openCreate">
-              Create class
-            </button>
-            <button class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @click="openCreateCourse">
-              Create course
-            </button>
-            <button class="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700" @click="goToCalendar">
-              Add event
-            </button>
+          <div class="flex gap-2">
+            <button class="px-3 py-1 border rounded" @click="openCreateCourse">Course</button>
+            <button class="px-3 py-1 border rounded" @click="openAddEvent">Event</button>
+            <button class="px-3 py-1 border rounded" @click="openCreateStudent">Student</button>
           </div>
         </div>
       </aside>
@@ -164,9 +170,6 @@
 
     <!-- Create Class Modal -->
     <CreateClassModal v-model:open="createOpen" @created="onClassCreated" />
-
-    <!-- Create Course Modal -->
-    <CreateCourseModal v-model:open="createCourseOpen" @created="onCourseCreated" />
   </div>
 </template>
 
@@ -176,8 +179,6 @@ import { useRouter } from 'vue-router'
 import { useTeacherClassesStore } from '../../stores/teacherClasses'
 import QuickActionCard from '../../components/admin/QuickActionCard.vue'
 import CreateClassModal from '../../components/teacher/CreateClassModal.vue'
-import CreateCourseModal from '../../components/teacher/CreateCourseModal.vue'
-import MyClassesPanel from '../../components/teacher/MyClassesPanel.vue'
 import KpiWidget from '../../components/admin/KPIWidget.vue'
 
 /* child components used dynamically (simple inline views) */
@@ -231,6 +232,8 @@ const store = useTeacherClassesStore()
 const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
 const createOpen = ref(false)
 const createCourseOpen = ref(false)
+const calendarOpen = ref(false)
+const createStudentOpen = ref(false)
 
 const tabs = [
   { key: 'overview', label: 'Overview' },
@@ -253,17 +256,14 @@ const activeComponent = computed(() => tabComponentMap[activeTab.value] || Class
 const tabData = computed(() => {
   if (activeTab.value === 'students') return store.getStudents()
   if (activeTab.value === 'active' || activeTab.value === 'overview') return store.active()
-  if (activeTab.value === 'assignments') return []
+  if (activeTab.value === 'assignments') return store.getAssignments()
   return []
 })
 
 // Computed properties for data
-const upcomingClasses = computed(() => store.upcoming(5))
-const upcomingEvents = computed(() => {
-  const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
-  return store.events.filter(e => e.ownerId === currentUser?.id && new Date(e.start) > new Date()).slice(0, 5)
-})
-const assignmentsNeedingGrading = computed(() => [])
+const upcomingClasses = computed(() => store.upcomingClasses(5))
+const upcomingEvents = computed(() => store.upcomingEvents(5))
+const assignmentsNeedingGrading = computed(() => store.assignmentsNeedingGrading())
 
 const stats = ref({ 
   activeClasses: 0, 
@@ -279,11 +279,12 @@ function formatDate(ts) {
 
 async function load() {
   await store.fetchAll()
+  const assignmentStats = store.getAssignmentStats()
   
-  stats.value.activeClasses = store.active().length
+  stats.value.activeClasses = store.activeClasses().length
   stats.value.totalStudents = store.totalStudents()
-  stats.value.totalAssignments = store.courses.length
-  stats.value.pendingGrading = 0
+  stats.value.totalAssignments = store.totalAssignments()
+  stats.value.pendingGrading = assignmentStats.pendingGrading
   stats.value.avgCompletion = store.avgCompletion()
 }
 
@@ -293,47 +294,42 @@ function activateTab(key) {
   activeTab.value = key
   // navigate to the page for deeper actions
   if (key === 'active') router.push({ name: 'TeacherClasses' })
-  if (key === 'students') router.push({ name: 'TeacherStudents' })
-  if (key === 'stats') router.push({ name: 'TeacherStatistics' })
+  if (key === 'students') router.push({ name: 'TeacherClasses' }) // Use classes page for now
+  if (key === 'stats') router.push({ name: 'TeacherReports' }) // Use reports for statistics
 }
 
 function goToClasses() { router.push({ name: 'TeacherClasses' }) }
-function goToStudents() { router.push({ name: 'TeacherStudents' }) }
+function goToStudents() { router.push({ name: 'TeacherClasses' }) } // Redirect to classes for now
 function goToAssignments() { router.push({ name: 'TeacherAssignmentList' }) }
 function goToCalendar() { router.push({ name: 'TeacherCalendar' }) }
-function goToStatistics() { router.push({ name: 'TeacherStatistics' }) }
+function goToStatistics() { router.push({ name: 'TeacherReports' }) }
 
 function openCreate(){ createOpen.value = true }
-function openCreateCourse(){ createCourseOpen.value = true }
 function onClassCreated(payload){
   store.addClass(payload)
   createOpen.value = false
   load()
 }
-function onCourseCreated(payload){
-  store.addCourse(payload)
-  createCourseOpen.value = false
-  load()
-}
 function viewClass(id){ router.push({ name: 'TeacherClassDetail', params: { id } }) }
 function joinClass(id){ router.push({ name: 'LiveSession', params: { id } }) }
 function editStudent(id){ 
-  router.push({ name: 'TeacherStudents' }) 
+  // For now, redirect to classes since student detail route doesn't exist
+  router.push({ name: 'TeacherClasses' }) 
 }
 function gradeAssignment(id){ 
   router.push({ name: 'TeacherAssignmentList' }) 
 }
 
+function openCreateCourse() { createCourseOpen.value = true }
+function openAddEvent() { calendarOpen.value = true }
+function openCreateStudent() { createStudentOpen.value = true }
+
 const nextClassText = computed(()=> {
-  const next = store.upcoming(1)[0]
+  const next = store.upcomingClasses(1)[0]
   return next ? formatDate(next.startAt) : 'No classes'
 })
 </script>
 
 <style scoped>
-.quick-grid {
-  display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(2, minmax(0,1fr));
-}
+/* adapt to your design tokens */
 </style>
