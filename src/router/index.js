@@ -23,7 +23,12 @@ const routes = [
       {
         path: 'classes',
         name: 'TeacherClasses',
-        component: () => import('../views/teacher/ClassesList.vue')
+        component: () => import('../views/teacher/ActiveClasses.vue')
+      },
+      {
+        path: 'classes/active',
+        name: 'TeacherActiveClasses',
+        component: () => import('../views/teacher/ActiveClasses.vue')
       },
       {
         path: 'classes/create',
@@ -33,7 +38,7 @@ const routes = [
       {
         path: 'classes/:id',
         name: 'TeacherClassDetail',
-        component: () => import('../views/teacher/ClassDetail.vue'),
+        component: () => import('../views/teacher/ActiveClasses.vue'),
         props: true
       },
       {
@@ -42,9 +47,19 @@ const routes = [
         component: () => import('../views/teacher/LiveClass.vue')
       },
       {
+        path: 'analytics',
+        name: 'TeacherAnalytics',
+        component: () => import('../views/teacher/Analytics.vue')
+      },
+      {
+        path: 'students',
+        name: 'TeacherStudents',
+        component: () => import('../views/teacher/Students.vue')
+      },
+      {
         path: 'assignments',
-        name: 'TeacherAssignmentList',
-        component: () => import('../views/teacher/AssignmentList.vue')
+        name: 'TeacherAssignments',
+        component: () => import('../views/teacher/Assignments.vue')
       },
       {
         path: 'assignments/create',
@@ -52,14 +67,24 @@ const routes = [
         component: () => import('../views/teacher/AssignmentCreate.vue')
       },
       {
+        path: 'grading',
+        name: 'TeacherGrading',
+        component: () => import('../views/teacher/Grading.vue')
+      },
+      {
         path: 'calendar',
         name: 'TeacherCalendar',
-        component: () => import('../views/shared/CalendarView.vue')
+        component: () => import('../views/teacher/TeacherCalendar.vue')
       },
       {
         path: 'reports',
         name: 'TeacherReports',
         component: () => import('../views/teacher/ReportsView.vue')
+      },
+      {
+        path: 'statistics',
+        name: 'TeacherStatistics',
+        component: () => import('../views/teacher/ReportsView.vue') // Using reports for now
       }
     ]
   },

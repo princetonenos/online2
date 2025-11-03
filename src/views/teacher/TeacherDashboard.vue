@@ -1,370 +1,340 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
-    <!-- Welcome section -->
-    <div class="mb-8">
-      <h1 class="text-3xl font-medium text-classroom-gray-900 mb-2">
-        Teacher Dashboard
-      </h1>
-      <p class="text-classroom-gray-600">Manage your classes, lessons, and student progress</p>
-    </div>
+  <div class="p-6 space-y-6">
+    <app-header :user="currentUser" />
 
-    <!-- Quick stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white rounded-classroom classroom-shadow p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-classroom-gray-500">Active Classes</p>
-            <p class="text-2xl font-medium text-classroom-gray-900">{{ activeClasses }}</p>
-          </div>
-          <div class="w-12 h-12 bg-classroom-primary bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-primary">school</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-classroom classroom-shadow p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-classroom-gray-500">Students</p>
-            <p class="text-2xl font-medium text-classroom-gray-900">{{ totalStudents }}</p>
-          </div>
-          <div class="w-12 h-12 bg-classroom-secondary bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-secondary">people</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-classroom classroom-shadow p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-classroom-gray-500">Avg. Completion</p>
-            <p class="text-2xl font-medium text-classroom-gray-900">{{ averageCompletion }}%</p>
-          </div>
-          <div class="w-12 h-12 bg-classroom-support bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-support">trending_up</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-classroom classroom-shadow p-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-classroom-gray-500">Avg. Score</p>
-            <p class="text-2xl font-medium text-classroom-gray-900">{{ averageScore }}%</p>
-          </div>
-          <div class="w-12 h-12 bg-classroom-primary bg-opacity-10 rounded-classroom flex items-center justify-center">
-            <span class="material-icons text-classroom-primary">grade</span>
-          </div>
-        </div>
+    <!-- Page header -->
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-semibold">Teacher Dashboard</h1>
+      <div class="flex items-center gap-3">
+        <div class="text-sm text-gray-600">Next class</div>
+        <div class="text-base font-medium">{{ nextClassText }}</div>
       </div>
     </div>
 
-    <!-- Today's timetable -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-      <div class="lg:col-span-2">
-        <div class="bg-white rounded-classroom classroom-shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-medium text-classroom-gray-900">Today's Timetable</h2>
-            <button @click="startLiveClass" class="btn-primary flex items-center space-x-2">
-              <span class="material-icons text-lg">video_call</span>
-              <span>Start Live Class</span>
-            </button>
-          </div>
+    <!-- Tabs -->
+    <nav class="flex gap-3 border-b pb-3">
+      <button v-for="t in tabs" :key="t.key"
+        @click="activateTab(t.key)"
+        :class="['px-3 py-2 rounded', activeTab === t.key ? 'bg-green-50 border-b-2 border-green-600' : 'hover:bg-gray-50']">
+        {{ t.label }}
+      </button>
+    </nav>
 
-          <div class="space-y-3">
-            <div 
-              v-for="session in todaysSessions"
-              :key="session.id"
-              class="flex items-center justify-between p-4 border border-classroom-gray-200 rounded-classroom hover:border-classroom-primary transition-colors"
-            >
-              <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-classroom-primary bg-opacity-10 rounded-classroom flex items-center justify-center">
-                  <span class="material-icons text-classroom-primary">schedule</span>
-                </div>
+    <!-- Top area: KPIs + Quick actions -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <section class="lg:col-span-2 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <kpi-widget title="Active classes" :value="stats.activeClasses" @click.native="goToClasses" />
+          <kpi-widget title="Students" :value="stats.totalStudents" @click.native="goToClasses" />
+          <kpi-widget title="Assignments" :value="stats.totalAssignments" @click.native="goToAssignments" />
+          <kpi-widget title="Grading" :value="stats.pendingGrading" @click.native="goToAssignments" />
+        </div>
+
+        <!-- Upcoming classes and events -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <section class="bg-white rounded shadow p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-medium">Upcoming classes</h3>
+              <button class="text-sm text-blue-600" @click="goToClasses">View all</button>
+            </div>
+            <ul class="space-y-2">
+              <li v-for="c in upcomingClasses" :key="c.id" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
                 <div>
-                  <h3 class="font-medium text-classroom-gray-900">{{ session.courseName }}</h3>
-                  <p class="text-sm text-classroom-gray-500">{{ session.time }}</p>
+                  <div class="font-medium text-sm">{{ c.title }}</div>
+                  <div class="text-xs text-gray-500">{{ formatDate(c.startAt) }}</div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="text-xs text-blue-600 hover:text-blue-800" @click="viewClass(c.id)">View</button>
+                  <button class="text-xs text-green-600 hover:text-green-800" @click="joinClass(c.id)">Join</button>
+                </div>
+              </li>
+              <li v-if="upcomingClasses.length===0" class="text-sm text-gray-500 text-center py-4">No upcoming classes</li>
+            </ul>
+          </section>
+
+          <section class="bg-white rounded shadow p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-medium">Upcoming events</h3>
+              <button class="text-sm text-blue-600" @click="goToCalendar">View all</button>
+            </div>
+            <ul class="space-y-2">
+              <li v-for="e in upcomingEvents" :key="e.id" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+                <div>
+                  <div class="font-medium text-sm">{{ e.title }}</div>
+                  <div class="text-xs text-gray-500">{{ formatDate(e.start) }}</div>
+                </div>
+                <div class="text-xs px-2 py-1 rounded" 
+                     :class="e.type === 'meeting' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'">
+                  {{ e.type }}
+                </div>
+              </li>
+              <li v-if="upcomingEvents.length===0" class="text-sm text-gray-500 text-center py-4">No upcoming events</li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Assignments needing grading -->
+        <section class="bg-white rounded shadow p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-medium">Assignments needing grading</h3>
+            <button class="text-sm text-blue-600" @click="goToAssignments">View all</button>
+          </div>
+          <ul class="space-y-2">
+            <li v-for="a in assignmentsNeedingGrading" :key="a.id" class="flex justify-between items-center p-2 hover:bg-gray-50 rounded">
+              <div>
+                <div class="font-medium text-sm">{{ a.title }}</div>
+                <div class="text-xs text-gray-500">
+                  Due: {{ formatDate(a.dueDate) }} • 
+                  Submissions: {{ a.submissions }} • 
+                  Graded: {{ a.graded }}/{{ a.submissions }}
                 </div>
               </div>
-              <button 
-                @click="joinSession(session)"
-                class="btn-outline flex items-center space-x-2"
-              >
-                <span class="material-icons text-lg">play_arrow</span>
-                <span>Join</span>
+              <button class="text-xs bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600" 
+                      @click="gradeAssignment(a.id)">
+                Grade
               </button>
-            </div>
+            </li>
+            <li v-if="assignmentsNeedingGrading.length===0" class="text-sm text-gray-500 text-center py-4">No assignments need grading</li>
+          </ul>
+        </section>
+      </section>
 
-            <div v-if="todaysSessions.length === 0" class="text-center py-8 text-classroom-gray-500">
-              <span class="material-icons text-4xl mb-2 opacity-50">event_busy</span>
-              <p>No classes scheduled for today</p>
+      <aside class="space-y-4">
+        <!-- My Classes Panel -->
+        <MyClassesPanel @create="openCreate" @view="viewClass" @open-all="goToClasses" />
+
+        <div class="quick-grid">
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <QuickActionCard icon="➕" title="Create class" subtitle="Quick create" @click="openCreate" />
+          </div>
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <QuickActionCard icon="📚" title="My classes" subtitle="View & manage" @click="goToClasses" />
+          </div>
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <QuickActionCard icon="📝" title="Assignments" subtitle="View & grade" @click="goToAssignments" />
+          </div>
+          <div class="transform transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg">
+            <QuickActionCard icon="📅" title="Calendar" subtitle="Schedule events" @click="goToCalendar" />
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded shadow">
+          <div class="text-sm font-medium text-gray-700 mb-3">Quick stats</div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total classes:</span>
+              <span class="font-medium">{{ stats.activeClasses }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total students:</span>
+              <span class="font-medium">{{ stats.totalStudents }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Avg. progress:</span>
+              <span class="font-medium">{{ stats.avgCompletion }}%</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Pending grading:</span>
+              <span class="font-medium text-orange-600">{{ stats.pendingGrading }}</span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Quick actions -->
-      <div class="space-y-4">
-        <div class="bg-white rounded-classroom classroom-shadow p-4">
-          <h3 class="font-medium text-classroom-gray-900 mb-3">Quick Actions</h3>
+        <div class="bg-white p-3 rounded shadow">
+          <div class="text-sm text-gray-600 mb-2">Quick actions</div>
           <div class="space-y-2">
-            <button @click="openClasses" class="w-full btn-outline flex items-center space-x-2 justify-start">
-              <span class="material-icons text-lg">school</span>
-              <span>My Classes</span>
+            <button class="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700" @click="openCreate">
+              Create class
             </button>
-            <button @click="openCreateClass" class="w-full btn-outline flex items-center space-x-2 justify-start">
-              <span class="material-icons text-lg">add_circle</span>
-              <span>Create Class</span>
+            <button class="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @click="openCreateCourse">
+              Create course
             </button>
-            <button @click="openCalendar" class="w-full btn-outline flex items-center space-x-2 justify-start">
-              <span class="material-icons text-lg">calendar_today</span>
-              <span>View Calendar</span>
-            </button>
-            <button @click="openAssignments" class="w-full btn-outline flex items-center space-x-2 justify-start">
-              <span class="material-icons text-lg">assignment</span>
-              <span>Assignments</span>
-            </button>
-            <button @click="openReports" class="w-full btn-outline flex items-center space-x-2 justify-start">
-              <span class="material-icons text-lg">assessment</span>
-              <span>Reports</span>
+            <button class="w-full py-2 bg-purple-600 text-white rounded hover:bg-purple-700" @click="goToCalendar">
+              Add event
             </button>
           </div>
         </div>
-
-        <!-- Low performers -->
-        <div class="bg-white rounded-classroom classroom-shadow p-4">
-          <h3 class="font-medium text-classroom-gray-900 mb-3">Low Performers</h3>
-          <div class="space-y-2">
-            <div 
-              v-for="student in lowPerformers"
-              :key="student.id"
-              class="flex items-center justify-between p-2 hover:bg-classroom-gray-50 rounded-classroom"
-            >
-              <div class="flex items-center space-x-2">
-                <img :src="student.avatar" :alt="student.name" class="w-8 h-8 rounded-full">
-                <span class="text-sm text-classroom-gray-900">{{ student.name }}</span>
-              </div>
-              <span class="chip bg-red-100 text-red-800 text-xs">{{ student.score }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </aside>
     </div>
 
-    <!-- Class roster -->
-    <div class="bg-white rounded-classroom classroom-shadow">
-      <div class="p-4 border-b border-classroom-gray-100">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-medium text-classroom-gray-900">Class Roster</h2>
-          <div class="flex items-center space-x-2">
-            <div class="relative">
-              <input
-                v-model="searchQuery"
-                type="text"
-                placeholder="Search students..."
-                class="pl-8 pr-4 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors text-sm"
-              >
-              <span class="material-icons absolute left-2 top-1/2 transform -translate-y-1/2 text-classroom-gray-400 text-sm">
-                search
-              </span>
-            </div>
-            <select
-              v-model="selectedClass"
-              class="px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors text-sm"
-            >
-              <option value="">All Classes</option>
-              <option v-for="course in teacherCourses" :key="course.id" :value="course.id">
-                {{ course.name }}
-              </option>
-            </select>
-          </div>
-        </div>
-      </div>
+    <!-- Tab content -->
+    <section class="bg-white rounded shadow p-4">
+      <component :is="activeComponent" :items="tabData" @edit-student="editStudent" />
+    </section>
 
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-classroom-gray-50">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Student</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Class</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Completion</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Avg. Score</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Last Active</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-classroom-gray-900">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr 
-              v-for="student in filteredStudents"
-              :key="student.id"
-              class="border-b border-classroom-gray-100 hover:bg-classroom-gray-50 transition-colors"
-            >
-              <td class="px-4 py-3">
-                <div class="flex items-center space-x-3">
-                  <img :src="student.avatar" :alt="student.name" class="w-8 h-8 rounded-full">
-                  <span class="text-sm text-classroom-gray-900">{{ student.name }}</span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-sm text-classroom-gray-900">{{ student.className }}</td>
-              <td class="px-4 py-3">
-                <div class="flex items-center space-x-2">
-                  <div class="w-16 bg-classroom-gray-200 rounded-full h-2">
-                    <div 
-                      class="bg-classroom-primary h-2 rounded-full transition-all"
-                      :style="{ width: student.completion + '%' }"
-                    ></div>
-                  </div>
-                  <span class="text-sm text-classroom-gray-600">{{ student.completion }}%</span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-sm text-classroom-gray-900">{{ student.avgScore }}%</td>
-              <td class="px-4 py-3 text-sm text-classroom-gray-500">{{ student.lastActive }}</td>
-              <td class="px-4 py-3">
-                <button 
-                  @click="messageStudent(student)"
-                  class="btn-outline text-xs px-2 py-1"
-                >
-                  Message
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <!-- Create Class Modal -->
+    <CreateClassModal v-model:open="createOpen" @created="onClassCreated" />
+
+    <!-- Create Course Modal -->
+    <CreateCourseModal v-model:open="createCourseOpen" @created="onCourseCreated" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUsersStore } from '../../store/users'
-import { useCoursesStore } from '../../store/courses'
+import { useTeacherClassesStore } from '../../stores/teacherClasses'
+import QuickActionCard from '../../components/admin/QuickActionCard.vue'
+import CreateClassModal from '../../components/teacher/CreateClassModal.vue'
+import CreateCourseModal from '../../components/teacher/CreateCourseModal.vue'
+import MyClassesPanel from '../../components/teacher/MyClassesPanel.vue'
+import KpiWidget from '../../components/admin/KPIWidget.vue'
+import AppHeader from '../../components/AppHeader.vue'
 
+/* child components used dynamically (simple inline views) */
+const ClassesListInline = {
+  props: ['items'],
+  template: `
+    <div>
+      <h3 class="font-medium mb-2">Active classes</h3>
+      <ul class="space-y-2">
+        <li v-for="c in items" :key="c.id" class="flex justify-between">
+          <div><div class="font-medium">{{ c.title }}</div><div class="text-xs text-gray-500">{{ c.startAt }}</div></div>
+          <div><router-link :to="{ name: 'TeacherClassDetail', params:{id:c.id} }" class="text-sm text-blue-600">Open</router-link></div>
+        </li>
+      </ul>
+    </div>`
+}
+
+const StudentsInline = {
+  props: ['items'],
+  template: `
+    <div>
+      <h3 class="font-medium mb-2">Students</h3>
+      <ul class="space-y-2">
+        <li v-for="s in items" :key="s.id" class="flex justify-between items-center">
+          <div>
+            <div class="font-medium">{{ s.name }}</div>
+            <div class="text-xs text-gray-500">{{ s.email }}</div>
+          </div>
+          <div>
+            <router-link :to="{ name: 'TeacherStudentDetail', params:{id:s.id} }" class="text-sm text-blue-600">Open</router-link>
+          </div>
+        </li>
+      </ul>
+    </div>`
+}
+
+const AssignmentsInline = {
+  props: ['items'],
+  template: `<div><h3 class="font-medium mb-2">Assignments</h3><div class="text-sm text-gray-500">List & quick stats go here</div></div>`
+}
+
+const StatisticsInline = {
+  props: ['items'],
+  template: `<div><h3 class="font-medium mb-2">Statistics</h3><div class="text-sm text-gray-500">Graphs and completion rates</div></div>`
+}
+
+/* store + router */
 const router = useRouter()
-const usersStore = useUsersStore()
-const coursesStore = useCoursesStore()
+const store = useTeacherClassesStore()
 
-const searchQuery = ref('')
-const selectedClass = ref('')
+const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+const createOpen = ref(false)
+const createCourseOpen = ref(false)
 
-// Mock data for teacher dashboard
-const activeClasses = ref(3)
-const totalStudents = ref(42)
-const averageCompletion = ref(78)
-const averageScore = ref(85)
+const tabs = [
+  { key: 'overview', label: 'Overview' },
+  { key: 'active', label: 'Active classes' },
+  { key: 'students', label: 'Students' },
+  { key: 'assignments', label: 'Assignments' },
+  { key: 'stats', label: 'Avg. completion' }
+]
+const activeTab = ref('overview')
 
-const todaysSessions = ref([
-  {
-    id: 1,
-    courseName: 'Advanced Mathematics',
-    time: '10:00 AM - 11:30 AM',
-    courseId: 'math101'
-  },
-  {
-    id: 2,
-    courseName: 'Physics Fundamentals',
-    time: '2:00 PM - 3:30 PM',
-    courseId: 'physics101'
-  }
-])
+const tabComponentMap = {
+  overview: ClassesListInline,
+  active: ClassesListInline,
+  students: StudentsInline,
+  assignments: AssignmentsInline,
+  stats: StatisticsInline
+}
 
-const lowPerformers = ref([
-  { id: 1, name: 'Alex Johnson', avatar: '/avatars/student1.jpg', score: 45 },
-  { id: 2, name: 'Sarah Miller', avatar: '/avatars/student2.jpg', score: 52 },
-  { id: 3, name: 'Tom Wilson', avatar: '/avatars/student3.jpg', score: 48 }
-])
-
-const students = ref([
-  { id: 1, name: 'Alex Johnson', avatar: '/avatars/student1.jpg', className: 'Advanced Mathematics', completion: 65, avgScore: 45, lastActive: '2 hours ago' },
-  { id: 2, name: 'Sarah Miller', avatar: '/avatars/student2.jpg', className: 'Physics Fundamentals', completion: 78, avgScore: 52, lastActive: '1 hour ago' },
-  { id: 3, name: 'Tom Wilson', avatar: '/avatars/student3.jpg', className: 'Advanced Mathematics', completion: 45, avgScore: 48, lastActive: '5 hours ago' },
-  { id: 4, name: 'Emma Davis', avatar: '/avatars/student4.jpg', className: 'Physics Fundamentals', completion: 92, avgScore: 88, lastActive: '30 minutes ago' }
-])
-
-const teacherCourses = computed(() => {
-  const currentUser = usersStore.currentUser
-  if (!currentUser) return []
-  return coursesStore.getCoursesForUser(currentUser.id)
+const activeComponent = computed(() => tabComponentMap[activeTab.value] || ClassesListInline)
+const tabData = computed(() => {
+  if (activeTab.value === 'students') return store.getStudents()
+  if (activeTab.value === 'active' || activeTab.value === 'overview') return store.active()
+  if (activeTab.value === 'assignments') return []
+  return []
 })
 
-const filteredStudents = computed(() => {
-  let filtered = students.value
-  
-  if (searchQuery.value) {
-    filtered = filtered.filter(student => 
-      student.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
-  }
-  
-  if (selectedClass.value) {
-    filtered = filtered.filter(student => 
-      teacherCourses.value.find(course => course.id === selectedClass.value)?.name === student.className
-    )
-  }
-  
-  return filtered
+// Computed properties for data
+const upcomingClasses = computed(() => store.upcoming(5))
+const upcomingEvents = computed(() => {
+  const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  return store.events.filter(e => e.ownerId === currentUser?.id && new Date(e.start) > new Date()).slice(0, 5)
+})
+const assignmentsNeedingGrading = computed(() => [])
+
+const stats = ref({ 
+  activeClasses: 0, 
+  totalStudents: 0, 
+  totalAssignments: 0,
+  pendingGrading: 0,
+  avgCompletion: 0 
 })
 
-const startLiveClass = () => {
-  showToast('Starting live class session...')
-  // In a real app, this would integrate with a video conferencing API
+function formatDate(ts) {
+  try { return new Date(ts).toLocaleString() } catch { return ts }
 }
 
-const joinSession = (session) => {
-  showToast(`Joining ${session.courseName} session`)
-  router.push(`/course/${session.courseId}/live`)
+async function load() {
+  await store.fetchAll()
+  
+  stats.value.activeClasses = store.active().length
+  stats.value.totalStudents = store.totalStudents()
+  stats.value.totalAssignments = store.courses.length
+  stats.value.pendingGrading = 0
+  stats.value.avgCompletion = store.avgCompletion()
 }
 
-const openLessonBuilder = () => {
-  showToast('Opening lesson builder...')
-  router.push('/lesson-builder')
+onMounted(load)
+
+function activateTab(key) {
+  activeTab.value = key
+  // navigate to the page for deeper actions
+  if (key === 'active') router.push({ name: 'TeacherClasses' })
+  if (key === 'students') router.push({ name: 'TeacherStudents' })
+  if (key === 'stats') router.push({ name: 'TeacherStatistics' })
 }
 
-const openAttendance = () => {
-  showToast('Opening attendance manager...')
-  router.push('/attendance')
+function goToClasses() { router.push({ name: 'TeacherClasses' }) }
+function goToStudents() { router.push({ name: 'TeacherStudents' }) }
+function goToAssignments() { router.push({ name: 'TeacherAssignmentList' }) }
+function goToCalendar() { router.push({ name: 'TeacherCalendar' }) }
+function goToStatistics() { router.push({ name: 'TeacherStatistics' }) }
+
+function openCreate(){ createOpen.value = true }
+function openCreateCourse(){ createCourseOpen.value = true }
+function onClassCreated(payload){
+  store.addClass(payload)
+  createOpen.value = false
+  load()
+}
+function onCourseCreated(payload){
+  store.addCourse(payload)
+  createCourseOpen.value = false
+  load()
+}
+function viewClass(id){ router.push({ name: 'TeacherClassDetail', params: { id } }) }
+function joinClass(id){ router.push({ name: 'LiveSession', params: { id } }) }
+function editStudent(id){ 
+  router.push({ name: 'TeacherStudents' }) 
+}
+function gradeAssignment(id){ 
+  router.push({ name: 'TeacherAssignmentList' }) 
 }
 
-const openGradebook = () => {
-  showToast('Opening gradebook...')
-  router.push('/grades')
-}
-
-const openClasses = () => {
-  router.push('/teacher/classes')
-}
-
-const openCreateClass = () => {
-  router.push('/teacher/create-class')
-}
-
-const openCalendar = () => {
-  router.push('/teacher/calendar')
-}
-
-const openAssignments = () => {
-  router.push('/teacher/assignments')
-}
-
-const openReports = () => {
-  router.push('/teacher/reports')
-}
-
-const messageStudent = (student) => {
-  showToast(`Opening chat with ${student.name}`)
-  // In a real app, this would open a messaging interface
-}
-
-onMounted(() => {
-  // Load teacher-specific data
-  coursesStore.loadCourses()
+const nextClassText = computed(()=> {
+  const next = store.upcoming(1)[0]
+  return next ? formatDate(next.startAt) : 'No classes'
 })
-
-// Toast utility
-const showToast = (message) => {
-  if (window.showToast) {
-    window.showToast(message)
-  }
-}
 </script>
+
+<style scoped>
+.quick-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+</style>

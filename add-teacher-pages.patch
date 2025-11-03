@@ -1,0 +1,325 @@
+diff --git a/src/router/index.js b/src/router/index.js
+index 1234567..abcdefg 100644
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -20,10 +20,14 @@ const routes = [
+     children: [
+       { path: '', redirect: { name: 'TeacherDashboard' } },
+       { path: 'dashboard', name: 'TeacherDashboard', component: () => import('../views/teacher/Dashboard.vue') },
+-      { path: 'classes', name: 'TeacherClasses', component: () => import('../views/teacher/ClassesList.vue') },
+-      { path: 'classes/create', name: 'TeacherClassCreate', component: () => import('../views/teacher/ClassCreate.vue') },
+-      { path: 'classes/:id', name: 'TeacherClassDetail', component: () => import('../views/teacher/ClassDetail.vue'), props: true },
+-      { path: 'calendar', name: 'TeacherCalendar', component: () => import('../views/teacher/CalendarView.vue') }
++      { path: 'classes', name: 'TeacherClasses', component: () => import('../views/teacher/ActiveClasses.vue') },
++      { path: 'classes/active', name: 'TeacherActiveClasses', component: () => import('../views/teacher/ActiveClasses.vue') },
++      { path: 'analytics', name: 'TeacherAnalytics', component: () => import('../views/teacher/Analytics.vue') },
++      { path: 'students', name: 'TeacherStudents', component: () => import('../views/teacher/Students.vue') },
++      { path: 'assignments', name: 'TeacherAssignments', component: () => import('../views/teacher/Assignments.vue') },
++      { path: 'grading', name: 'TeacherGrading', component: () => import('../views/teacher/Grading.vue') },
++      { path: 'classes/:id', name: 'TeacherClassDetail', component: () => import('../views/teacher/ActiveClasses.vue'), props: true },
++      { path: 'calendar', name: 'TeacherCalendar', component: () => import('../views/teacher/TeacherCalendar.vue') }
+     ]
+   },
+diff --git a/src/views/teacher/ActiveClasses.vue b/src/views/teacher/ActiveClasses.vue
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/views/teacher/ActiveClasses.vue
+@@ -0,0 +1,36 @@
++<template>
++  <div class="p-6">
++    <h2 class="text-xl font-semibold mb-4">Active classes</h2>
++    <div v-if="classes.length === 0" class="text-sm text-gray-500">No active classes.</div>
++    <ul class="space-y-3">
++      <li v-for="c in classes" :key="c.id" class="bg-white rounded shadow p-4 flex justify-between items-center">
++        <div>
++          <div class="font-medium">{{ c.title }}</div>
++          <div class="text-xs text-gray-500">{{ formatDate(c.startAt) }} • {{ c.level }} • {{ c.status }}</div>
++        </div>
++        <div class="flex gap-2">
++          <router-link :to="{ name: 'TeacherClassDetail', params: { id: c.id } }" class="text-sm text-blue-600">Open</router-link>
++          <button class="text-sm text-red-600" @click="remove(c.id)">Delete</button>
++        </div>
++      </li>
++    </ul>
++  </div>
++</template>
++
++<script setup>
++import { computed } from 'vue'
++import { useTeacherClassesStore } from '../../stores/teacherClasses'
++const store = useTeacherClassesStore()
++store.fetchAll()
++const classes = computed(() => store.active().filter(c => c.teacherId === (JSON.parse(localStorage.getItem('mock:currentUser')||'{}').id)))
++function formatDate(iso){ try{return new Date(iso).toLocaleString()}catch{return iso} }
++function remove(id){
++  if(!confirm('Delete class?')) return
++  store.removeClass(id)
++}
++</script>
++
++<style scoped></style>
+diff --git a/src/views/teacher/Analytics.vue b/src/views/teacher/Analytics.vue
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/views/teacher/Analytics.vue
+@@ -0,0 +1,42 @@
++<template>
++  <div class="p-6">
++    <h2 class="text-xl font-semibold mb-4">Analytics</h2>
++    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
++      <div class="bg-white p-4 rounded shadow">
++        <div class="text-sm text-gray-500">Avg. completion</div>
++        <div class="text-2xl font-semibold mt-2">{{ avgCompletion }}%</div>
++      </div>
++      <div class="bg-white p-4 rounded shadow">
++        <div class="text-sm text-gray-500">Active classes</div>
++        <div class="text-2xl font-semibold mt-2">{{ activeCount }}</div>
++      </div>
++      <div class="bg-white p-4 rounded shadow">
++        <div class="text-sm text-gray-500">Students</div>
++        <div class="text-2xl font-semibold mt-2">{{ studentCount }}</div>
++      </div>
++    </div>
++
++    <section class="bg-white rounded shadow p-4">
++      <h3 class="font-medium mb-2">Engagement (last 30 days)</h3>
++      <div class="h-40 bg-gray-50 flex items-center justify-center text-gray-400">
++        Chart placeholder — plug Chart.js / Recharts here.
++      </div>
++    </section>
++  </div>
++</template>
++
++<script setup>
++import { computed, onMounted } from 'vue'
++import { useTeacherClassesStore } from '../../stores/teacherClasses'
++const store = useTeacherClassesStore()
++onMounted(()=>store.fetchAll())
++const currentUser = JSON.parse(localStorage.getItem('mock:currentUser')||'{}')
++const myClasses = computed(()=> store.items.filter(c=>c.teacherId===currentUser.id))
++const studentCount = computed(()=> store.getStudents().length)
++const activeCount = computed(()=> myClasses.value.filter(c=>c.status==='active' || c.status==='scheduled').length)
++const avgCompletion = computed(()=> store.avgCompletion())
++</script>
++
++<style scoped></style>
+diff --git a/src/views/teacher/Students.vue b/src/views/teacher/Students.vue
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/views/teacher/Students.vue
+@@ -0,0 +1,87 @@
++<template>
++  <div class="p-6">
++    <h2 class="text-xl font-semibold mb-4">Students</h2>
++
++    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
++      <div class="lg:col-span-2 bg-white rounded shadow p-4">
++        <div class="flex items-center justify-between mb-3">
++          <h3 class="font-medium">Enrolled students</h3>
++          <button class="text-sm text-blue-600" @click="refresh">Refresh</button>
++        </div>
++        <ul class="space-y-3">
++          <li v-for="s in students" :key="s.id" class="flex justify-between items-center">
++            <div>
++              <div class="font-medium">{{ s.name }}</div>
++              <div class="text-xs text-gray-500">{{ s.email }}</div>
++            </div>
++            <div class="flex gap-2">
++              <router-link :to="{ name: 'TeacherStudentDetail', params:{ id: s.id } }" class="text-sm text-blue-600">Open</router-link>
++              <button class="text-sm text-red-600" @click="remove(s.id)">Remove</button>
++            </div>
++          </li>
++        </ul>
++      </div>
++
++      <aside class="bg-white rounded shadow p-4">
++        <h3 class="font-medium mb-2">Enroll student</h3>
++        <form @submit.prevent="enroll">
++          <label class="block mb-2 text-sm">Name
++            <input v-model="form.name" required class="w-full p-2 border rounded mt-1"/>
++          </label>
++          <label class="block mb-2 text-sm">Email
++            <input v-model="form.email" required class="w-full p-2 border rounded mt-1"/>
++          </label>
++          <label class="block mb-3 text-sm">Class
++            <select v-model="form.classId" class="w-full p-2 border rounded mt-1">
++              <option v-for="c in myClasses" :value="c.id" :key="c.id">{{ c.title }}</option>
++            </select>
++          </label>
++          <div class="flex justify-end gap-2">
++            <button type="button" class="px-3 py-1 border rounded" @click="clear">Clear</button>
++            <button class="px-3 py-1 bg-green-600 text-white rounded">Enroll</button>
++          </div>
++        </form>
++      </aside>
++    </section>
++  </div>
++</template>
++
++<script setup>
++import { reactive, computed } from 'vue'
++import { useTeacherClassesStore } from '../../stores/teacherClasses'
++const store = useTeacherClassesStore()
++store.fetchAll()
++const currentUser = JSON.parse(localStorage.getItem('mock:currentUser')||'{}')
++const students = computed(()=> store.getStudents())
++const myClasses = computed(()=> store.items.filter(c=>c.teacherId === currentUser.id))
++
++const form = reactive({ name:'', email:'', classId: myClasses.value[0]?.id || '' })
++
++function enroll(){
++  const id = 's' + Date.now()
++  const student = { id, name: form.name, email: form.email, progress: 0 }
++  // save to mock students
++  const list = JSON.parse(localStorage.getItem('mock:students')||'[]')
++  list.unshift(student)
++  localStorage.setItem('mock:students', JSON.stringify(list))
++  // attach to class (add students array)
++  const classes = JSON.parse(localStorage.getItem('mock:classes')||'[]')
++  const cls = classes.find(x=>x.id===form.classId)
++  if(cls){
++    cls.students = cls.students || []
++    cls.students.push(student.id)
++    localStorage.setItem('mock:classes', JSON.stringify(classes))
++    // refresh store
++    store.fetchAll()
++    alert('Student enrolled')
++    clear()
++  } else {
++    alert('Class not found')
++  }
++}
++function clear(){ form.name=''; form.email=''; form.classId = myClasses.value[0]?.id || '' }
++function remove(id){
++  if(!confirm('Remove student?')) return
++  let list = JSON.parse(localStorage.getItem('mock:students')||'[]')
++  list = list.filter(s=>s.id!==id)
++  localStorage.setItem('mock:students', JSON.stringify(list))
++  store.fetchAll()
++}
++function refresh(){ store.fetchAll() }
++</script>
++
++<style scoped></style>
+diff --git a/src/views/teacher/Assignments.vue b/src/views/teacher/Assignments.vue
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/views/teacher/Assignments.vue
+@@ -0,0 +1,63 @@
++<template>
++  <div class="p-6">
++    <h2 class="text-xl font-semibold mb-4">Assignments</h2>
++    <div v-if="assignments.length===0" class="text-sm text-gray-500">No assignments yet.</div>
++    <ul class="space-y-3">
++      <li v-for="a in assignments" :key="a.id" class="bg-white rounded shadow p-4">
++        <div class="flex justify-between items-start">
++          <div>
++            <div class="font-medium">{{ a.title }}</div>
++            <div class="text-xs text-gray-500">Due: {{ formatDate(a.dueAt) }}</div>
++            <div class="text-xs text-gray-500">Class: {{ getClassTitle(a.classId) }}</div>
++          </div>
++          <div class="text-sm text-gray-600">{{ a.submissions?.length || 0 }} submissions</div>
++        </div>
++        <div class="mt-3">
++          <h4 class="font-medium text-sm mb-2">Submissions</h4>
++          <ul class="space-y-2">
++            <li v-for="s in a.submissions" :key="s.userId" class="flex justify-between items-center">
++              <div class="text-sm">{{ getStudentName(s.userId) }} <span class="text-xs text-gray-500">({{ s.submittedAt }})</span></div>
++              <div class="flex gap-2">
++                <div v-if="s.grade!=null" class="text-sm text-green-600">Grade: {{ s.grade }}</div>
++                <button v-else class="text-sm text-blue-600" @click="gradeSubmission(a.id, s.userId)">Grade</button>
++              </div>
++            </li>
++            <li v-if="!a.submissions || a.submissions.length===0" class="text-sm text-gray-500">No submissions</li>
++          </ul>
++        </div>
++      </li>
++    </ul>
++  </div>
++</template>
++
++<script setup>
++import { ref } from 'vue'
++const assignments = ref(JSON.parse(localStorage.getItem('mock:assignments')||'[]'))
++function formatDate(iso){ try{return new Date(iso).toLocaleString()}catch{return iso} }
++function getClassTitle(id){ const classes = JSON.parse(localStorage.getItem('mock:classes')||'[]'); const c = classes.find(x=>x.id===id); return c ? c.title : '—' }
++function getStudentName(id){ const students = JSON.parse(localStorage.getItem('mock:students')||'[]'); const s = students.find(x=>x.id===id); return s ? s.name : id }
++function gradeSubmission(assignmentId, userId){
++  const as = JSON.parse(localStorage.getItem('mock:assignments')||'[]')
++  const a = as.find(x=>x.id===assignmentId)
++  if(!a) return alert('Assignment not found')
++  const sub = a.submissions.find(s=>s.userId===userId)
++  const g = prompt(`Enter grade for ${getStudentName(userId)}`)
++  if(g!=null){
++    sub.grade = Number(g)
++    localStorage.setItem('mock:assignments', JSON.stringify(as))
++    assignments.value = as
++    alert('Grade saved')
++  }
++}
++</script>
++
++<style scoped></style>
+diff --git a/src/views/teacher/Grading.vue b/src/views/teacher/Grading.vue
+new file mode 100644
+index 0000000..1234567
+--- /dev/null
++++ b/src/views/teacher/Grading.vue
+@@ -0,0 +1,54 @@
++<template>
++  <div class="p-6">
++    <h2 class="text-xl font-semibold mb-4">Grading</h2>
++    <div v-if="toGrade.length===0" class="text-sm text-gray-500">No submissions pending grading.</div>
++    <ul class="space-y-3">
++      <li v-for="entry in toGrade" :key="entry.key" class="bg-white rounded shadow p-4">
++        <div class="flex justify-between">
++          <div>
++            <div class="font-medium">{{ entry.assignment.title }}</div>
++            <div class="text-xs text-gray-500">{{ getStudentName(entry.sub.userId) }} • {{ formatDate(entry.sub.submittedAt) }}</div>
++          </div>
++          <div class="flex gap-2 items-center">
++            <input v-model.number="entry.value" type="number" class="w-20 p-1 border rounded" placeholder="Grade"/>
++            <button class="px-3 py-1 bg-green-600 text-white rounded" @click="saveGrade(entry)">Save</button>
++          </div>
++        </div>
++      </li>
++    </ul>
++  </div>
++</template>
++
++<script setup>
++import { ref } from 'vue'
++const assignments = JSON.parse(localStorage.getItem('mock:assignments')||'[]')
++const students = JSON.parse(localStorage.getItem('mock:students')||'[]')
++const toGrade = ref([])
++function formatDate(iso){ try{return new Date(iso).toLocaleString()}catch{return iso} }
++function getStudentName(id){ const s = students.find(x=>x.id===id); return s? s.name : id }
++// prepare list of ungraded submissions
++for(const a of assignments){
++  if(a.submissions && a.submissions.length){
++    for(const sub of a.submissions){
++      if(sub.grade==null){
++        toGrade.value.push({ key: a.id + ':' + sub.userId, assignment: a, sub, value: null })
++      }
++    }
++  }
++}
++function saveGrade(entry){
++  const as = JSON.parse(localStorage.getItem('mock:assignments')||'[]')
++  const a = as.find(x=>x.id===entry.assignment.id)
++  if(!a) return
++  const s = a.submissions.find(x=>x.userId===entry.sub.userId)
++  s.grade = Number(entry.value)
++  localStorage.setItem('mock:assignments', JSON.stringify(as))
++  // remove from toGrade
++  toGrade.value = toGrade.value.filter(x=>x.key !== entry.key)
++  alert('Grade saved')
++}
++</script>
++
++<style scoped></style>
++
