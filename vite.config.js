@@ -4,7 +4,7 @@ import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/online/',
+  base: '/',
   plugins: [vue()],
   resolve: {
     alias: { '@': resolve(__dirname, 'src') }
