@@ -343,6 +343,7 @@ const routes = [
 ]
 
 const router = createRouter({
+  
   history: createWebHistory('/online2/'),
   routes
 })
