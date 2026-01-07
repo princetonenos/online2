@@ -2,6 +2,15 @@
   <div class="p-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
+      <div class="flex items-center mb-4">
+        <button 
+          @click="goBack"
+          class="flex items-center space-x-2 text-classroom-gray-600 hover:text-classroom-primary transition-colors mb-2"
+        >
+          <span class="material-icons">arrow_back</span>
+          <span>Back</span>
+        </button>
+      </div>
       <h1 class="text-3xl font-medium text-classroom-gray-900 mb-2">Your Classes</h1>
       <p class="text-classroom-gray-600">All the classes you're enrolled in</p>
     </div>
@@ -107,10 +116,10 @@
                 <div class="flex items-center space-x-4 text-xs text-classroom-gray-500">
                   <span class="flex items-center space-x-1">
                     <span class="material-icons text-sm">schedule</span>
-                    <span>{{ formatDueDate(assignment.dueDate) }}</span>
+                    <span>{{ formatDueDate(assignment) }}</span>
                   </span>
-                  <span class="chip" :class="getPointsClass(assignment.points)">
-                    {{ assignment.points }} points
+                  <span class="chip" :class="getPointsClass(assignment.maxPoints || assignment.points || 100)">
+                    {{ assignment.maxPoints || assignment.points || 100 }} points
                   </span>
                   <span v-if="assignment.submissionStatus === 'submitted'" class="chip chip-primary">
                     Submitted
@@ -130,39 +139,90 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUsersStore } from '../../store/users'
-import { useCoursesStore } from '../../store/courses'
 import { useAssignmentsStore } from '../../store/assignments'
 
 const router = useRouter()
-const usersStore = useUsersStore()
-const coursesStore = useCoursesStore()
 const assignmentsStore = useAssignmentsStore()
 
-const currentUser = computed(() => usersStore.currentUser)
-const enrolledClasses = computed(() => {
-  if (!currentUser.value) return []
-  return coursesStore.getCoursesForUser(currentUser.value.id)
+// Get current user from localStorage
+const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+
+// State for classes
+const classes = ref([])
+
+// Load classes from localStorage
+function loadClasses() {
+  const allClasses = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+  const myClasses = allClasses.filter(cls => 
+    cls.students && cls.students.includes(currentUser?.id)
+  )
+  classes.value = myClasses
+}
+
+// Load on mount and when returning from join page
+onMounted(() => {
+  loadClasses()
+  
+  // Set up event listener for storage changes
+  window.addEventListener('storage', loadClasses)
+  
+  // Also listen for custom event when class is joined
+  window.addEventListener('classJoined', loadClasses)
 })
 
+// Format classes for display
+const enrolledClasses = computed(() => {
+  return classes.value.map(cls => ({
+    id: cls.id,
+    name: cls.title,
+    code: cls.code || 'N/A',
+    teacherName: getTeacherName(cls.teacherId),
+    enrolledStudents: cls.students?.length || 0,
+    schedule: formatSchedule(cls),
+    ...cls
+  }))
+})
+
+function getTeacherName(teacherId) {
+  const users = JSON.parse(localStorage.getItem('mock:users') || '[]')
+  const teacher = users.find(u => u.id === teacherId)
+  return teacher ? teacher.name : 'Unknown Teacher'
+}
+
+function formatSchedule(cls) {
+  if (!cls.startAt) return 'Schedule TBD'
+  const date = new Date(cls.startAt)
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
+  const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  const duration = cls.duration || 60
+  return `${dayName}, ${time} (${duration} min)`
+}
+
 const upcomingAssignments = computed(() => {
-  const assignments = assignmentsStore.assignments.filter(assignment => {
-    const dueDate = new Date(assignment.dueDate)
+  const allAssignments = JSON.parse(localStorage.getItem('mock:assignments') || '[]')
+  const myClassIds = classes.value.map(c => c.id)
+  
+  const assignments = allAssignments.filter(assignment => {
+    if (!myClassIds.includes(assignment.classId)) return false
+    const dueDate = new Date(assignment.dueAt || assignment.dueDate)
     const now = new Date()
     return dueDate > now && dueDate < new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // Next 7 days
   })
   
-  return assignments.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).slice(0, 5)
+  return assignments.sort((a, b) => new Date(a.dueAt || a.dueDate) - new Date(b.dueAt || b.dueDate)).slice(0, 5)
 })
 
 const getCourseName = (courseId) => {
-  const course = coursesStore.getCourseById(courseId)
-  return course?.name || 'Unknown Course'
+  const cls = classes.value.find(c => c.id === courseId)
+  return cls?.title || cls?.name || 'Unknown Course'
 }
 
-const formatDueDate = (dueDate) => {
+const formatDueDate = (assignment) => {
+  const dueDate = assignment.dueAt || assignment.dueDate
+  if (!dueDate) return 'No due date'
+  
   const date = new Date(dueDate)
   const now = new Date()
   const diffTime = date.getTime() - now.getTime()
@@ -195,5 +255,9 @@ const navigateToClasswork = (classId) => {
 
 const navigateToAssignment = (assignment) => {
   router.push(`/student/classwork/${assignment.id}`)
+}
+
+const goBack = () => {
+  router.back()
 }
 </script>

@@ -1,0 +1,396 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum ClassStatus {
+  ACTIVE
+  ARCHIVED
+  DRAFT
+}
+
+enum AssignmentType {
+  ASSIGNMENT
+  QUIZ
+  MATERIAL
+  QUESTION
+}
+
+enum SubmissionStatus {
+  ASSIGNED
+  TURNED_IN
+  GRADED
+  RETURNED
+  MISSING
+  LATE
+}
+
+enum PostType {
+  ANNOUNCEMENT
+  MATERIAL
+  ASSIGNMENT
+  QUESTION
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum NotificationType {
+  ASSIGNMENT_CREATED
+  ASSIGNMENT_GRADED
+  POST_CREATED
+  COMMENT_ADDED
+  CLASS_INVITATION
+  SUBMISSION_REMINDER
+  SYSTEM
+}
+
+// Models
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String   @map("password_hash")
+  role          UserRole @default(STUDENT)
+  firstName     String   @map("first_name")
+  lastName      String   @map("last_name")
+  fullName      String   @map("full_name")
+  avatarUrl     String?  @map("avatar_url")
+  bio           String?
+  phone         String?
+  gender        Gender?
+  dateOfBirth   DateTime? @map("date_of_birth")
+  
+  // School/Organization info
+  schoolId      String?  @map("school_id")
+  school        School?  @relation(fields: [schoolId], references: [id])
+  studentId     String?  @unique @map("student_id") // School-specific ID
+  
+  // Settings
+  emailVerified Boolean  @default(false) @map("email_verified")
+  isActive      Boolean  @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at")
+  
+  // Timestamps
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  ownedClasses      Class[]        @relation("ClassOwner")
+  enrollments       Enrollment[]
+  posts             Post[]
+  comments          Comment[]
+  assignments       Assignment[]
+  submissions       Submission[]
+  attendanceRecords Attendance[]
+  notifications     Notification[]
+  sentNotifications Notification[] @relation("NotificationSender")
+  
+  @@map("users")
+}
+
+model School {
+  id          String   @id @default(uuid())
+  name        String
+  domain      String?  @unique
+  address     String?
+  phone       String?
+  email       String?
+  logoUrl     String?  @map("logo_url")
+  settings    Json?    // School-specific settings
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  users       User[]
+  classes     Class[]
+  
+  @@map("schools")
+}
+
+model Class {
+  id          String      @id @default(uuid())
+  name        String
+  section     String?
+  subject     String?
+  room        String?
+  description String?
+  bannerUrl   String?     @map("banner_url")
+  code        String      @default(cuid())
+  status      ClassStatus @default(ACTIVE)
+  
+  // Ownership
+  ownerId     String      @map("owner_id")
+  owner       User        @relation("ClassOwner", fields: [ownerId], references: [id])
+  
+  schoolId    String?     @map("school_id")
+  school      School?     @relation(fields: [schoolId], references: [id])
+  
+  // Settings
+  settings    Json?       // Class-specific settings
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  
+  // Relations
+  enrollments Enrollment[]
+  posts       Post[]
+  assignments Assignment[]
+  sessions    Session[]
+  
+  @@map("classes")
+  @@unique([code, schoolId])
+  @@index([schoolId])
+}
+
+model Enrollment {
+  id          String   @id @default(uuid())
+  
+  classId     String   @map("class_id")
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  role        UserRole @default(STUDENT)
+  enrolledAt  DateTime @default(now()) @map("enrolled_at")
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  @@unique([classId, userId])
+  @@map("enrollments")
+}
+
+model Assignment {
+  id          String         @id @default(uuid())
+  
+  classId     String         @map("class_id")
+  class       Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  type        AssignmentType @default(ASSIGNMENT)
+  points      Int?
+  dueDate     DateTime?      @map("due_date")
+  
+  // Created by
+  createdById String         @map("created_by_id")
+  createdBy   User           @relation(fields: [createdById], references: [id])
+  
+  // Topics/Categories
+  topic       String?
+  
+  // Attachments (stored as JSON array of file references)
+  attachments Json?
+  
+  // Settings
+  allowLateSubmission Boolean @default(true) @map("allow_late_submission")
+  
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  
+  // Relations
+  submissions Submission[]
+  
+  @@map("assignments")
+}
+
+model Submission {
+  id           String           @id @default(uuid())
+  
+  assignmentId String           @map("assignment_id")
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  
+  studentId    String           @map("student_id")
+  student      User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  status       SubmissionStatus @default(ASSIGNED)
+  
+  // Submission content
+  content      String?
+  attachments  Json?            // Array of file references
+  
+  // Grading
+  grade        Float?
+  feedback     String?
+  
+  gradedById   String?          @map("graded_by_id")
+  gradedAt     DateTime?        @map("graded_at")
+  
+  submittedAt  DateTime?        @map("submitted_at")
+  returnedAt   DateTime?        @map("returned_at")
+  
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  
+  classId     String   @map("class_id")
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  authorId    String   @map("author_id")
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  type        PostType @default(ANNOUNCEMENT)
+  title       String?
+  content     String
+  
+  // Attachments
+  attachments Json?
+  
+  // Scheduling
+  scheduledAt DateTime? @map("scheduled_at")
+  publishedAt DateTime? @map("published_at")
+  
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  comments    Comment[]
+  
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  
+  postId    String   @map("post_id")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  authorId  String   @map("author_id")
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  content   String
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("comments")
+}
+
+model Session {
+  id          String   @id @default(uuid())
+  
+  classId     String   @map("class_id")
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  
+  title       String
+  description String?
+  
+  startTime   DateTime @map("start_time")
+  endTime     DateTime? @map("end_time")
+  
+  // Session details
+  resources   Json?    // Links, materials used in session
+  notes       String?
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relations
+  attendance  Attendance[]
+  
+  @@map("sessions")
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  
+  sessionId String           @map("session_id")
+  session   Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  studentId String           @map("student_id")
+  student   User             @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  status    AttendanceStatus @default(PRESENT)
+  notes     String?
+  
+  timestamp DateTime         @default(now())
+  
+  @@unique([sessionId, studentId])
+  @@map("attendance")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  
+  userId     String           @map("user_id")
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type       NotificationType
+  title      String
+  content    String
+  
+  // Related entities
+  relatedId  String?          @map("related_id") // ID of related entity (assignment, post, etc.)
+  
+  // Sender (optional, for user-generated notifications)
+  senderId   String?          @map("sender_id")
+  sender     User?            @relation("NotificationSender", fields: [senderId], references: [id])
+  
+  isRead     Boolean          @default(false) @map("is_read")
+  readAt     DateTime?        @map("read_at")
+  
+  createdAt  DateTime         @default(now()) @map("created_at")
+  
+  @@map("notifications")
+}
+
+model File {
+  id          String   @id @default(uuid())
+  
+  filename    String
+  originalName String   @map("original_name")
+  mimeType    String   @map("mime_type")
+  size        Int      // in bytes
+  url         String
+  
+  // S3/Spaces info
+  bucket      String?
+  key         String?
+  
+  uploadedById String  @map("uploaded_by_id")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  @@map("files")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@map("refresh_tokens")
+}

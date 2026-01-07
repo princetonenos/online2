@@ -2,6 +2,15 @@
   <div class="p-6 max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
+      <div class="flex items-center mb-4">
+        <button 
+          @click="goBack"
+          class="flex items-center space-x-2 text-classroom-gray-600 hover:text-classroom-primary transition-colors mb-2"
+        >
+          <span class="material-icons">arrow_back</span>
+          <span>Back</span>
+        </button>
+      </div>
       <h1 class="text-3xl font-medium text-classroom-gray-900 mb-2">People</h1>
       <p class="text-classroom-gray-600">Teachers and classmates in your courses</p>
     </div>
@@ -123,5 +132,9 @@ const showToast = (message) => {
   if (window.showToast) {
     window.showToast(message)
   }
+}
+
+const goBack = () => {
+  router.back()
 }
 </script>

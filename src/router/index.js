@@ -9,7 +9,7 @@ const routes = [
   // Teacher routes
   {
     path: '/teacher',
-    component: () => import('../views/teacher/TeacherDashboard.vue'),
+    component: () => import('../layouts/MainLayout.vue'),
     children: [
       {
         path: '',
@@ -91,7 +91,7 @@ const routes = [
   // Student routes
   {
     path: '/student',
-    component: () => import('../views/student/Dashboard.vue'),
+    component: () => import('../layouts/MainLayout.vue'),
     children: [
       {
         path: '',
@@ -111,6 +111,12 @@ const routes = [
         path: 'classes/:id',
         name: 'StudentClassDetail',
         component: () => import('../views/student/ClassDetail.vue'),
+        props: true
+      },
+      {
+        path: 'classes/:id/live',
+        name: 'StudentLiveClass',
+        component: () => import('../views/student/LiveClass.vue'),
         props: true
       },
       {
@@ -148,13 +154,28 @@ const routes = [
         path: 'stream',
         name: 'StudentStream',
         component: () => import('../views/student/Stream.vue')
+      },
+      {
+        path: 'analytics',
+        name: 'StudentAnalytics',
+        component: () => import('../views/student/Analytics.vue')
+      },
+      {
+        path: 'resources',
+        name: 'StudentResources',
+        component: () => import('../views/student/Resources.vue')
+      },
+      {
+        path: 'achievements',
+        name: 'StudentAchievements',
+        component: () => import('../views/student/Achievements.vue')
       }
     ]
   },
   // Admin routes
   {
     path: '/admin',
-    component: () => import('../views/admin/Dashboard.vue'),
+    component: () => import('../layouts/MainLayout.vue'),
     children: [
       {
         path: '',
@@ -194,13 +215,18 @@ const routes = [
       {
         path: 'classes',
         name: 'AdminClasses',
-        component: () => import('../views/admin/ClassesList.vue')
+        component: () => import('../views/admin/manageclass.vue')
       },
       {
         path: 'classes/:id',
         name: 'AdminClassDetail',
-        component: () => import('../views/admin/ClassDetail.vue'),
+        component: () => import('../views/admin/viewClass.vue'),
         props: true
+      },
+      {
+        path: 'class-templates',
+        name: 'AdminClassTemplates',
+        component: () => import('../views/admin/ClassTemplates.vue')
       },
       {
         path: 'assignments/moderation',
@@ -226,6 +252,26 @@ const routes = [
         path: 'settings',
         name: 'AdminSettings',
         component: () => import('../views/admin/Settings.vue')
+      },
+      {
+        path: 'bulk-operations',
+        name: 'AdminBulkOperations',
+        component: () => import('../views/admin/BulkOperations.vue')
+      },
+      {
+        path: 'analytics',
+        name: 'AdminAnalytics',
+        component: () => import('../views/admin/Analytics.vue')
+      },
+      {
+        path: 'backup',
+        name: 'AdminBackup',
+        component: () => import('../views/admin/Backup.vue')
+      },
+      {
+        path: 'users/bulk-import',
+        name: 'AdminUserBulkImport',
+        component: () => import('../views/admin/UserBulkImport.vue')
       }
     ]
   },
@@ -303,7 +349,7 @@ const router = createRouter({
 
 // Route guard for role-based access
 router.beforeEach((to, from, next) => {
-  const user = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  const user = JSON.parse(localStorage.getItem('auth:user') || 'null')
   
   // Check if route requires specific role
   if (to.path.startsWith('/teacher') && user?.role !== 'teacher') {

@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-all duration-200 cursor-pointer"
+    class="bg-white rounded-classroom classroom-shadow border border-classroom-gray-200 hover:border-classroom-primary transition-all duration-300 cursor-pointer animate-hover-lift animate-press"
     @click="$emit('click')"
   >
     <div class="p-4">

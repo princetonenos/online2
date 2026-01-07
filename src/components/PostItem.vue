@@ -201,8 +201,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useUsersStore } from '../store/users'
-import { usePostsStore } from '../store/posts'
 import AttachmentPreview from './AttachmentPreview.vue'
 
 const props = defineProps({
@@ -214,18 +212,21 @@ const props = defineProps({
 
 const emit = defineEmits(['post-updated', 'post-deleted', 'comment-added'])
 
-const usersStore = useUsersStore()
-const postsStore = usePostsStore()
-
 const showOptions = ref(false)
 const showComments = ref(false)
 const newComment = ref('')
 
-const currentUser = computed(() => usersStore.currentUser)
-const author = computed(() => usersStore.getUserById(props.post.authorId))
+const currentUser = computed(() => {
+  return JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+})
+
+const author = computed(() => {
+  const users = JSON.parse(localStorage.getItem('mock:users') || '[]')
+  return users.find(u => u.id === props.post.authorId)
+})
 
 const canEdit = computed(() => {
-  return currentUser.value?.id === props.post.authorId || usersStore.isTeacher
+  return currentUser.value?.id === props.post.authorId || currentUser.value?.role === 'teacher'
 })
 
 const getPostTypeClass = (type) => {
@@ -269,7 +270,8 @@ const formatDate = (dateString) => {
 }
 
 const getCommentAuthor = (authorId) => {
-  return usersStore.getUserById(authorId)
+  const users = JSON.parse(localStorage.getItem('mock:users') || '[]')
+  return users.find(u => u.id === authorId)
 }
 
 const toggleOptions = () => {
@@ -304,7 +306,14 @@ const reusePost = () => {
 const deletePost = async () => {
   if (confirm('Are you sure you want to delete this post?')) {
     try {
-      await postsStore.deletePost(props.post.id)
+      // Delete from localStorage
+      const allPosts = JSON.parse(localStorage.getItem('mock:posts') || '[]')
+      const filtered = allPosts.filter(p => p.id !== props.post.id)
+      localStorage.setItem('mock:posts', JSON.stringify(filtered))
+      
+      // Dispatch event
+      window.dispatchEvent(new CustomEvent('postDeleted'))
+      
       emit('post-deleted', props.post.id)
       showToast('Post deleted successfully')
     } catch (error) {
@@ -317,17 +326,39 @@ const deletePost = async () => {
 
 const addComment = async () => {
   if (!newComment.value.trim()) return
+  
+  const currentUserData = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  if (!currentUserData) {
+    showToast('Please login to comment')
+    return
+  }
 
-  const commentData = {
-    authorId: currentUser.value.id,
-    content: newComment.value.trim()
+  const comment = {
+    id: 'comment_' + Date.now(),
+    authorId: currentUserData.id,
+    content: newComment.value.trim(),
+    createdAt: new Date().toISOString()
   }
 
   try {
-    await postsStore.addComment(props.post.id, commentData)
-    emit('comment-added', props.post.id, commentData)
-    newComment.value = ''
-    showToast('Comment added successfully')
+    // Update post in localStorage
+    const allPosts = JSON.parse(localStorage.getItem('mock:posts') || '[]')
+    const postIndex = allPosts.findIndex(p => p.id === props.post.id)
+    
+    if (postIndex !== -1) {
+      if (!allPosts[postIndex].comments) {
+        allPosts[postIndex].comments = []
+      }
+      allPosts[postIndex].comments.push(comment)
+      localStorage.setItem('mock:posts', JSON.stringify(allPosts))
+      
+      // Dispatch event for real-time updates
+      window.dispatchEvent(new CustomEvent('postUpdated'))
+      
+      emit('comment-added', props.post.id, comment)
+      newComment.value = ''
+      showToast('Comment added successfully')
+    }
   } catch (error) {
     console.error('Error adding comment:', error)
     showToast('Error adding comment')

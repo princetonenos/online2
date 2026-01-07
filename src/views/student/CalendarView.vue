@@ -69,8 +69,10 @@
               class="text-xs p-1 rounded-classroom truncate cursor-pointer"
               :class="getEventClass(event.type)"
               @click.stop="navigateToEvent(event)"
+              :title="event.time ? `${event.title} at ${event.time}` : event.title"
             >
               {{ event.title }}
+              <div v-if="event.time" class="text-[10px] opacity-75">{{ event.time }}</div>
             </div>
           </div>
         </div>
@@ -181,25 +183,28 @@ const upcomingEvents = computed(() => {
   
   const events = []
   
-  // Add classes (mock schedule)
-  enrolledClasses.value.forEach(course => {
-    // Mock class schedule - in real app this would come from course schedule data
-    const classDays = ['Mon', 'Wed', 'Fri'] // Example schedule
-    const classTime = '10:00 AM'
-    
-    classDays.forEach(day => {
-      const nextClassDate = getNextClassDate(day)
-      if (nextClassDate >= today) {
-        events.push({
-          id: `class-${course.id}-${nextClassDate.toISOString()}`,
-          title: course.name,
-          description: `Class with ${course.teacherName}`,
-          date: nextClassDate,
-          type: 'class',
-          courseId: course.id
-        })
-      }
-    })
+  // Get classes from localStorage where student is enrolled
+  const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  const classes = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+  const studentClasses = classes.filter(cls => 
+    cls.students && cls.students.includes(currentUser?.id)
+  )
+  
+  // Add scheduled classes
+  studentClasses.forEach(cls => {
+    const classDate = new Date(cls.startAt)
+    if (classDate >= today) {
+      events.push({
+        id: `class-${cls.id}`,
+        title: cls.title,
+        description: `${cls.subject || 'Class'} • ${cls.level || 'All Levels'}`,
+        date: classDate,
+        time: classDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        duration: cls.duration || 60,
+        type: 'class',
+        courseId: cls.id
+      })
+    }
   })
   
   // Add assignments
@@ -225,25 +230,27 @@ const upcomingEvents = computed(() => {
 })
 
 const enrolledClasses = computed(() => {
-  if (!usersStore.currentUser) return []
-  return coursesStore.getCoursesForUser(usersStore.currentUser.id)
+  const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  const classes = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+  return classes.filter(cls => 
+    cls.students && cls.students.includes(currentUser?.id)
+  )
 })
 
 const getEventsForDate = (date) => {
   const events = []
   const dateString = date.toDateString()
   
-  // Check for classes on this day
-  enrolledClasses.value.forEach(course => {
-    const classDays = ['Mon', 'Wed', 'Fri'] // Mock schedule
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' })
-    
-    if (classDays.includes(dayName)) {
+  // Check for classes scheduled on this day
+  enrolledClasses.value.forEach(cls => {
+    const classDate = new Date(cls.startAt)
+    if (classDate.toDateString() === dateString) {
       events.push({
-        id: `class-${course.id}-${dateString}`,
-        title: course.name,
+        id: `class-${cls.id}`,
+        title: cls.title,
         type: 'class',
-        courseId: course.id
+        courseId: cls.id,
+        time: classDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       })
     }
   })
@@ -263,20 +270,6 @@ const getEventsForDate = (date) => {
   })
   
   return events
-}
-
-const getNextClassDate = (dayName) => {
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const today = new Date()
-  const targetDay = days.indexOf(dayName)
-  const currentDay = today.getDay()
-  
-  let daysToAdd = targetDay - currentDay
-  if (daysToAdd <= 0) daysToAdd += 7
-  
-  const nextDate = new Date(today)
-  nextDate.setDate(today.getDate() + daysToAdd)
-  return nextDate
 }
 
 const getEventClass = (type) => {
@@ -303,7 +296,14 @@ const getEventTypeClass = (type) => {
 
 const formatEventTime = (event) => {
   if (event.type === 'class') {
-    return `${event.date.toLocaleDateString()} at 10:00 AM` // Mock time
+    const dateStr = event.date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    })
+    const timeStr = event.time || event.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const durationStr = event.duration ? ` (${event.duration} min)` : ''
+    return `${dateStr} at ${timeStr}${durationStr}`
   } else {
     return `Due ${event.date.toLocaleDateString()}`
   }

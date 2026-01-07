@@ -1,213 +1,85 @@
 <template>
-  <div class="p-6">
-    <div class="max-w-2xl mx-auto">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-medium text-classroom-gray-900">Create User</h1>
-        <router-link 
-          to="/admin/users"
-          class="btn-outline flex items-center space-x-2"
-        >
-          <span class="material-icons">arrow_back</span>
-          <span>Back to Users</span>
-        </router-link>
+  <div class="p-6 max-w-2xl">
+    <h1 class="text-2xl font-semibold mb-6">Create User</h1>
+    <form class="space-y-4" @submit.prevent="submit">
+      <div>
+        <label class="block text-sm mb-1" for="name">Name</label>
+        <input v-model="form.name" id="name" type="text" class="border rounded px-3 py-2 w-full" placeholder="Full name" required />
+      </div>
+      <div>
+        <label class="block text-sm mb-1" for="email">Email</label>
+        <input v-model="form.email" id="email" type="email" class="border rounded px-3 py-2 w-full" placeholder="email@example.com" required />
+      </div>
+      <div>
+        <label class="block text-sm mb-1" for="role">Role</label>
+        <select v-model="form.role" id="role" class="border rounded px-3 py-2 w-full">
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm mb-1" for="school">School</label>
+        <input v-model="form.school" id="school" type="text" class="border rounded px-3 py-2 w-full" placeholder="School name" />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-1" for="password">Password</label>
+          <input v-model="password" id="password" type="password" class="border rounded px-3 py-2 w-full" placeholder="At least 6 characters" minlength="6" required />
+        </div>
+        <div>
+          <label class="block text-sm mb-1" for="confirm">Confirm Password</label>
+          <input v-model="confirm" id="confirm" type="password" class="border rounded px-3 py-2 w-full" placeholder="Re-enter password" minlength="6" required />
+        </div>
       </div>
 
-      <div class="bg-white rounded-classroom classroom-shadow p-6">
-        <form @submit.prevent="handleSubmit" class="space-y-6">
-          <!-- Name -->
-          <div>
-            <label for="name" class="block text-sm font-medium text-classroom-gray-900 mb-2">
-              Full Name
-            </label>
-            <input
-              id="name"
-              v-model="form.name"
-              type="text"
-              required
-              placeholder="Enter full name"
-              class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors"
-              :class="{ 'border-red-500': errors.name }"
-            >
-            <p v-if="errors.name" class="text-red-500 text-xs mt-1">{{ errors.name }}</p>
-          </div>
+      <div v-if="error" class="p-3 bg-red-50 text-red-700 rounded">{{ error }}</div>
 
-          <!-- Email -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-classroom-gray-900 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              v-model="form.email"
-              type="email"
-              required
-              placeholder="Enter email address"
-              class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors"
-              :class="{ 'border-red-500': errors.email }"
-            >
-            <p v-if="errors.email" class="text-red-500 text-xs mt-1">{{ errors.email }}</p>
-          </div>
-
-          <!-- Role -->
-          <div>
-            <label for="role" class="block text-sm font-medium text-classroom-gray-900 mb-2">
-              Role
-            </label>
-            <select
-              id="role"
-              v-model="form.role"
-              required
-              class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors"
-              :class="{ 'border-red-500': errors.role }"
-            >
-              <option value="">Select Role</option>
-              <option value="student">Student</option>
-              <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
-            </select>
-            <p v-if="errors.role" class="text-red-500 text-xs mt-1">{{ errors.role }}</p>
-          </div>
-
-          <!-- School -->
-          <div>
-            <label for="school" class="block text-sm font-medium text-classroom-gray-900 mb-2">
-              School
-            </label>
-            <input
-              id="school"
-              v-model="form.school"
-              type="text"
-              placeholder="Enter school name"
-              class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors"
-            >
-          </div>
-
-          <!-- Status -->
-          <div>
-            <label class="flex items-center space-x-2">
-              <input
-                v-model="form.status"
-                type="checkbox"
-                true-value="active"
-                false-value="inactive"
-                class="rounded border-classroom-gray-300 text-classroom-primary focus:ring-classroom-primary"
-              >
-              <span class="text-sm text-classroom-gray-700">Active User</span>
-            </label>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center justify-end space-x-4 pt-6 border-t border-classroom-gray-200">
-            <router-link 
-              to="/admin/users"
-              class="btn-outline"
-            >
-              Cancel
-            </router-link>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary flex items-center space-x-2"
-              :class="{ 'opacity-50 cursor-not-allowed': loading }"
-            >
-              <span v-if="loading" class="material-icons animate-spin">refresh</span>
-              <span>{{ loading ? 'Creating...' : 'Create User' }}</span>
-            </button>
-          </div>
-        </form>
+      <div class="flex gap-3 pt-2">
+        <router-link to="/admin/users" class="px-4 py-2 border rounded">Cancel</router-link>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded" :disabled="loading">
+          {{ loading ? 'Creating...' : 'Create User' }}
+        </button>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUsersStore } from '@/store/users'
 
 const router = useRouter()
+const users = useUsersStore()
+
+const form = ref({ name: '', email: '', role: 'student', school: '' })
+const password = ref('')
+const confirm = ref('')
 const loading = ref(false)
+const error = ref('')
 
-const form = reactive({
-  name: '',
-  email: '',
-  role: '',
-  school: 'Main Campus',
-  status: 'active'
-})
-
-const errors = reactive({
-  name: '',
-  email: '',
-  role: ''
-})
-
-const validateForm = () => {
-  let isValid = true
-
-  // Reset errors
-  errors.name = ''
-  errors.email = ''
-  errors.role = ''
-
-  // Name validation
-  if (!form.name.trim()) {
-    errors.name = 'Name is required'
-    isValid = false
-  }
-
-  // Email validation
-  if (!form.email) {
-    errors.email = 'Email is required'
-    isValid = false
-  } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-    errors.email = 'Email is invalid'
-    isValid = false
-  }
-
-  // Role validation
-  if (!form.role) {
-    errors.role = 'Role is required'
-    isValid = false
-  }
-
-  return isValid
-}
-
-const handleSubmit = async () => {
-  if (!validateForm()) {
+async function submit() {
+  error.value = ''
+  if (password.value !== confirm.value) {
+    error.value = 'Passwords do not match'
     return
   }
-
   loading.value = true
-
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // Create user object
-    const newUser = {
-      id: Date.now(),
-      ...form,
-      avatar: '/avatars/default.jpg',
-      createdAt: new Date().toISOString()
+    await users.loadFromStorage()
+    const exists = users.getByEmail(form.value.email)
+    if (exists) {
+      error.value = 'A user with this email already exists'
+      return
     }
-
-    // In a real app, this would save to store/API
-    showToast(`User ${form.name} created successfully`)
-    
-    // Redirect to users list
+    await users.createUser(form.value, password.value)
+    if (window.showToast) window.showToast('User created')
     router.push('/admin/users')
-  } catch (error) {
-    console.error('Error creating user:', error)
-    showToast('Error creating user. Please try again.')
+  } catch (e) {
+    error.value = e?.message || 'Failed to create user'
   } finally {
     loading.value = false
-  }
-}
-
-const showToast = (message) => {
-  if (window.showToast) {
-    window.showToast(message)
   }
 }
 </script>

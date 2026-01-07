@@ -186,8 +186,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useUsersStore } from '../store/users'
-import { usePostsStore } from '../store/posts'
 
 const props = defineProps({
   courseId: {
@@ -197,9 +195,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['post-created'])
-
-const usersStore = useUsersStore()
-const postsStore = usePostsStore()
 
 const showComposer = ref(false)
 const selectedType = ref('announcement')
@@ -213,7 +208,9 @@ const schedulePost = ref(false)
 const scheduledDate = ref('')
 const scheduledTime = ref('')
 
-const currentUser = computed(() => usersStore.currentUser)
+const currentUser = computed(() => {
+  return JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+})
 
 const postTypes = [
   { value: 'announcement', label: 'Announcement', icon: 'campaign' },
@@ -287,10 +284,17 @@ const formatFileSize = (bytes) => {
 
 const createPost = async () => {
   if (!canCreatePost.value) return
+  
+  const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || 'null')
+  if (!currentUser) {
+    showToast('Please login to create posts')
+    return
+  }
 
-  const postData = {
+  const newPost = {
+    id: 'post_' + Date.now(),
     courseId: props.courseId,
-    authorId: currentUser.value.id,
+    authorId: currentUser.id,
     type: selectedType.value,
     title: postTitle.value.trim(),
     content: postContent.value.trim(),
@@ -302,14 +306,24 @@ const createPost = async () => {
     })),
     topics: selectedTopics.value,
     audience: selectedAudience.value,
+    comments: [],
+    likes: [],
     scheduled: schedulePost.value,
-    scheduledAt: schedulePost.value ? `${scheduledDate.value}T${scheduledTime.value}` : null
+    scheduledAt: schedulePost.value ? `${scheduledDate.value}T${scheduledTime.value}` : null,
+    createdAt: new Date().toISOString()
   }
 
   try {
-    const newPost = await postsStore.createPost(postData)
+    // Save to localStorage
+    const allPosts = JSON.parse(localStorage.getItem('mock:posts') || '[]')
+    allPosts.unshift(newPost)
+    localStorage.setItem('mock:posts', JSON.stringify(allPosts))
+    
+    // Dispatch event for real-time updates
+    window.dispatchEvent(new CustomEvent('postCreated'))
+    
     emit('post-created', newPost)
-    showToast('Post created successfully')
+    showToast('Post created successfully!')
     resetForm()
     showComposer.value = false
   } catch (error) {

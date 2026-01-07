@@ -1,57 +1,76 @@
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
-    <div class="bg-white rounded-classroom classroom-shadow p-6">
-      <div class="flex items-center justify-between mb-6">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
+    <!-- Header Section -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-medium text-classroom-gray-900">Create Class</h1>
-          <p class="text-classroom-gray-600 mt-1">Set up a new class with all the necessary details</p>
+          <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Create New Class
+          </h1>
+          <p class="text-gray-600 mt-2">Set up a new class with all the necessary details and settings</p>
         </div>
-        <button 
-          @click="$router.back()"
-          class="btn-outline flex items-center space-x-2"
-        >
-          <span class="material-icons text-lg">arrow_back</span>
-          <span>Back</span>
-        </button>
-      </div>
-
-      <form @submit.prevent="createClass" class="space-y-6">
-        <!-- Progress Steps -->
-        <div class="flex items-center justify-between mb-8">
-          <div 
-            v-for="(step, index) in steps"
-            :key="step.id"
-            class="flex items-center"
+        <div class="flex items-center space-x-4">
+          <button 
+            @click="$router.back()"
+            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-classroom transition-colors flex items-center space-x-2"
           >
-            <div 
-              class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors"
-              :class="getStepClass(step.id)"
-            >
-              {{ step.id }}
+            <span class="material-icons text-sm">arrow_back</span>
+            <span>Back</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <!-- Progress Steps -->
+        <div class="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200 p-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+              <div 
+                v-for="(step, index) in steps"
+                :key="step.id"
+                class="flex items-center"
+              >
+                <div 
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
+                  :class="getStepClass(step.id)"
+                >
+                  <span v-if="step.id < currentStep" class="material-icons text-sm">check</span>
+                  <span v-else>{{ step.id }}</span>
+                </div>
+                <span 
+                  class="ml-2 text-sm font-medium transition-colors"
+                  :class="getStepTextClass(step.id)"
+                >
+                  {{ step.name }}
+                </span>
+                <div 
+                  v-if="index < steps.length - 1"
+                  class="w-12 h-0.5 mx-4 transition-colors"
+                  :class="getStepLineClass(step.id)"
+                ></div>
+              </div>
             </div>
-            <span 
-              class="ml-2 text-sm font-medium transition-colors"
-              :class="getStepTextClass(step.id)"
-            >
-              {{ step.name }}
-            </span>
-            <div 
-              v-if="index < steps.length - 1"
-              class="w-12 h-0.5 mx-4 transition-colors"
-              :class="getStepLineClass(step.id)"
-            ></div>
+            <div class="text-sm text-gray-500">Step {{ currentStep }} of {{ steps.length }}</div>
           </div>
         </div>
 
-        <!-- Step 1: Basic Information -->
-        <div v-if="currentStep === 1" class="space-y-6">
-          <div class="border border-classroom-gray-200 rounded-classroom p-6">
-            <h2 class="text-lg font-medium text-classroom-gray-900 mb-4">Basic Information</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Title -->
+        <form @submit.prevent="createClass" class="p-6 space-y-8">
+          <!-- Step 1: Basic Information -->
+          <div v-if="currentStep === 1" class="space-y-6">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-blue-100 rounded-classroom flex items-center justify-center">
+                <span class="material-icons text-blue-600 text-sm">info</span>
+              </div>
+              <h2 class="text-xl font-bold text-gray-900">Basic Information</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Class Title -->
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Class Title *
                 </label>
                 <input
@@ -59,7 +78,7 @@
                   type="text"
                   required
                   placeholder="e.g., Advanced Mathematics"
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   @input="validateField('title')"
                 >
                 <p v-if="errors.title" class="text-red-500 text-xs mt-1">{{ errors.title }}</p>
@@ -67,83 +86,69 @@
 
               <!-- Subject -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Subject *
                 </label>
                 <select
                   v-model="form.subject"
                   required
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none"
                   @change="validateField('subject')"
                 >
                   <option value="">Select subject</option>
-                  <option value="mathematics">Mathematics</option>
-                  <option value="science">Science</option>
-                  <option value="english">English</option>
-                  <option value="history">History</option>
-                  <option value="art">Art</option>
-                  <option value="music">Music</option>
-                  <option value="physical-education">Physical Education</option>
-                  <option value="computer-science">Computer Science</option>
-                  <option value="foreign-language">Foreign Language</option>
+                  <option value="Mathematics">Mathematics</option>
+                  <option value="Science">Science</option>
+                  <option value="English">English</option>
+                  <option value="History">History</option>
+                  <option value="Art">Art</option>
+                  <option value="Music">Music</option>
+                  <option value="Physical Education">Physical Education</option>
+                  <option value="Computer Science">Computer Science</option>
+                  <option value="Foreign Language">Foreign Language</option>
                 </select>
                 <p v-if="errors.subject" class="text-red-500 text-xs mt-1">{{ errors.subject }}</p>
               </div>
 
               <!-- Grade Level -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Grade Level
                 </label>
                 <select
                   v-model="form.gradeLevel"
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none"
                 >
                   <option value="">Any grade</option>
-                  <option value="elementary">Elementary</option>
-                  <option value="middle-school">Middle School</option>
-                  <option value="high-school">High School</option>
-                  <option value="college">College</option>
-                  <option value="adult">Adult Education</option>
+                  <option value="Elementary">Elementary</option>
+                  <option value="Middle School">Middle School</option>
+                  <option value="High School">High School</option>
+                  <option value="College">College</option>
+                  <option value="Adult Education">Adult Education</option>
                 </select>
-              </div>
-
-              <!-- Description -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
-                  Description
-                </label>
-                <textarea
-                  v-model="form.description"
-                  rows="3"
-                  placeholder="Describe what students will learn in this class..."
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors resize-none focus-classroom"
-                ></textarea>
-                <p class="text-xs text-classroom-gray-500 mt-1">{{ form.description.length }}/500 characters</p>
               </div>
 
               <!-- Level -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Level *
                 </label>
                 <select
                   v-model="form.level"
                   required
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none"
                   @change="validateField('level')"
                 >
                   <option value="">Select level</option>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
                 </select>
                 <p v-if="errors.level" class="text-red-500 text-xs mt-1">{{ errors.level }}</p>
               </div>
 
-              <!-- Capacity (Optional) -->
+              <!-- Capacity -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Capacity (Optional)
                 </label>
                 <input
@@ -152,50 +157,74 @@
                   min="1"
                   max="100"
                   placeholder="e.g., 30"
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 >
-                <p class="text-xs text-classroom-gray-500 mt-1">Maximum 100 students</p>
+                <p class="text-xs text-gray-500 mt-1">Maximum 100 students</p>
               </div>
+
+              <!-- Description -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  v-model="form.description"
+                  rows="3"
+                  placeholder="Describe what students will learn in this class..."
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                ></textarea>
+                <div class="flex justify-between items-center mt-1">
+                  <p class="text-xs text-gray-500">{{ form.description.length }}/500 characters</p>
+                  <div class="flex items-center space-x-2 text-xs text-gray-500">
+                    <span class="material-icons text-sm">format_bold</span>
+                    <span class="material-icons text-sm">format_italic</span>
+                    <span class="material-icons text-sm">format_list_bulleted</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step Navigation -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                @click="$router.back()"
+                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-classroom hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                @click="nextStep"
+                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-classroom transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="!isStep1Valid"
+              >
+                <span>Next</span>
+                <span class="material-icons text-sm">arrow_forward</span>
+              </button>
             </div>
           </div>
 
-          <!-- Step Navigation -->
-          <div class="flex items-center justify-end space-x-4 pt-6">
-            <button
-              type="button"
-              @click="$router.back()"
-              class="btn-outline"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              @click="nextStep"
-              class="btn-primary flex items-center space-x-2"
-              :disabled="!isStep1Valid"
-            >
-              <span>Next</span>
-              <span class="material-icons text-lg">arrow_forward</span>
-            </button>
-          </div>
-        </div>
+          <!-- Step 2: Schedule & Settings -->
+          <div v-if="currentStep === 2" class="space-y-6">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-purple-100 rounded-classroom flex items-center justify-center">
+                <span class="material-icons text-purple-600 text-sm">schedule</span>
+              </div>
+              <h2 class="text-xl font-bold text-gray-900">Schedule & Settings</h2>
+            </div>
 
-        <!-- Step 2: Schedule & Settings -->
-        <div v-if="currentStep === 2" class="space-y-6">
-          <div class="border border-classroom-gray-200 rounded-classroom p-6">
-            <h2 class="text-lg font-medium text-classroom-gray-900 mb-4">Schedule & Settings</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Start Date/Time -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Start Date & Time *
                 </label>
                 <input
                   v-model="form.startAt"
                   type="datetime-local"
                   required
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   @change="validateField('startAt')"
                 >
                 <p v-if="errors.startAt" class="text-red-500 text-xs mt-1">{{ errors.startAt }}</p>
@@ -203,7 +232,7 @@
 
               <!-- Duration -->
               <div>
-                <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Duration (minutes) *
                 </label>
                 <input
@@ -213,32 +242,35 @@
                   max="480"
                   required
                   placeholder="e.g., 90"
-                  class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                  class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   @input="validateField('durationMinutes')"
                 >
                 <p v-if="errors.durationMinutes" class="text-red-500 text-xs mt-1">{{ errors.durationMinutes }}</p>
-                <p class="text-xs text-classroom-gray-500 mt-1">15-480 minutes</p>
+                <p class="text-xs text-gray-500 mt-1">15-480 minutes</p>
               </div>
 
               <!-- Recurring Class -->
               <div class="md:col-span-2">
-                <label class="flex items-center space-x-2">
+                <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-classroom hover:bg-gray-100 cursor-pointer">
                   <input
                     v-model="form.isRecurring"
                     type="checkbox"
-                    class="rounded border-classroom-gray-300 text-classroom-primary focus:ring-classroom-primary focus-classroom"
+                    class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   >
-                  <span class="text-sm font-medium text-classroom-gray-900">This is a recurring class</span>
+                  <div>
+                    <span class="text-sm font-medium text-gray-900">This is a recurring class</span>
+                    <p class="text-xs text-gray-500 mt-1">Schedule multiple sessions automatically</p>
+                  </div>
                 </label>
               </div>
 
               <!-- Recurrence Settings -->
               <div v-if="form.isRecurring" class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-classroom-gray-900 mb-2">Frequency</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
                   <select
                     v-model="form.recurrence.frequency"
-                    class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                    class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none"
                   >
                     <option value="weekly">Weekly</option>
                     <option value="biweekly">Bi-weekly</option>
@@ -247,96 +279,120 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-classroom-gray-900 mb-2">Occurrences</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Occurrences</label>
                   <input
                     v-model="form.recurrence.occurrences"
                     type="number"
                     min="1"
                     max="52"
                     placeholder="e.g., 12"
-                    class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                    class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   >
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-classroom-gray-900 mb-2">End Date</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                   <input
                     v-model="form.recurrence.endDate"
                     type="date"
-                    class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                    class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                   >
                 </div>
               </div>
 
               <!-- Class Settings -->
-              <div class="md:col-span-2 space-y-3">
-                <h3 class="text-md font-medium text-classroom-gray-900">Class Settings</h3>
+              <div class="md:col-span-2 space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Class Settings</h3>
                 
-                <div class="space-y-2">
-                  <label class="flex items-center space-x-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-classroom hover:bg-gray-100 cursor-pointer">
                     <input
                       v-model="form.settings.allowStudentPosts"
                       type="checkbox"
-                      class="rounded border-classroom-gray-300 text-classroom-primary focus:ring-classroom-primary focus-classroom"
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     >
-                    <span class="text-sm text-classroom-gray-900">Allow students to post in class stream</span>
+                    <div>
+                      <span class="text-sm font-medium text-gray-900">Allow student posts</span>
+                      <p class="text-xs text-gray-500 mt-1">Students can post in class stream</p>
+                    </div>
                   </label>
                   
-                  <label class="flex items-center space-x-2">
+                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-classroom hover:bg-gray-100 cursor-pointer">
                     <input
                       v-model="form.settings.allowStudentComments"
                       type="checkbox"
-                      class="rounded border-classroom-gray-300 text-classroom-primary focus:ring-classroom-primary focus-classroom"
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     >
-                    <span class="text-sm text-classroom-gray-900">Allow students to comment on posts</span>
+                    <div>
+                      <span class="text-sm font-medium text-gray-900">Allow student comments</span>
+                      <p class="text-xs text-gray-500 mt-1">Students can comment on posts</p>
+                    </div>
                   </label>
                   
-                  <label class="flex items-center space-x-2">
+                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-classroom hover:bg-gray-100 cursor-pointer">
                     <input
                       v-model="form.settings.showDeletedItems"
                       type="checkbox"
-                      class="rounded border-classroom-gray-300 text-classroom-primary focus:ring-classroom-primary focus-classroom"
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     >
-                    <span class="text-sm text-classroom-gray-900">Show deleted items in class stream</span>
+                    <div>
+                      <span class="text-sm font-medium text-gray-900">Show deleted items</span>
+                      <p class="text-xs text-gray-500 mt-1">Show deleted items in class stream</p>
+                    </div>
+                  </label>
+                  
+                  <label class="flex items-center space-x-3 p-4 bg-gray-50 rounded-classroom hover:bg-gray-100 cursor-pointer">
+                    <input
+                      v-model="form.settings.autoEnrollStudents"
+                      type="checkbox"
+                      class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    >
+                    <div>
+                      <span class="text-sm font-medium text-gray-900">Auto-enroll students</span>
+                      <p class="text-xs text-gray-500 mt-1">Automatically enroll new students</p>
+                    </div>
                   </label>
                 </div>
               </div>
             </div>
+
+            <!-- Step Navigation -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                @click="prevStep"
+                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-classroom hover:bg-gray-50 transition-colors flex items-center space-x-2"
+              >
+                <span class="material-icons text-sm">arrow_back</span>
+                <span>Previous</span>
+              </button>
+              <button
+                type="button"
+                @click="nextStep"
+                class="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-classroom transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="!isStep2Valid"
+              >
+                <span>Next</span>
+                <span class="material-icons text-sm">arrow_forward</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Step Navigation -->
-          <div class="flex items-center justify-end space-x-4 pt-6">
-            <button
-              type="button"
-              @click="prevStep"
-              class="btn-outline flex items-center space-x-2"
-            >
-              <span class="material-icons text-lg">arrow_back</span>
-              <span>Previous</span>
-            </button>
-            <button
-              type="button"
-              @click="nextStep"
-              class="btn-primary flex items-center space-x-2"
-              :disabled="!isStep2Valid"
-            >
-              <span>Next</span>
-              <span class="material-icons text-lg">arrow_forward</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 3: Resources & Materials -->
-        <div v-if="currentStep === 3" class="space-y-6">
-          <div class="border border-classroom-gray-200 rounded-classroom p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-medium text-classroom-gray-900">Resources & Materials</h2>
+          <!-- Step 3: Resources & Materials -->
+          <div v-if="currentStep === 3" class="space-y-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-orange-100 rounded-classroom flex items-center justify-center">
+                  <span class="material-icons text-orange-600 text-sm">attach_file</span>
+                </div>
+                <h2 class="text-xl font-bold text-gray-900">Resources & Materials</h2>
+              </div>
               <button 
                 type="button"
                 @click="addResource"
-                class="btn-outline flex items-center space-x-2 text-sm"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-classroom transition-colors flex items-center space-x-2"
               >
-                <span class="material-icons text-lg">add</span>
+                <span class="material-icons text-sm">add</span>
                 <span>Add Resource</span>
               </button>
             </div>
@@ -345,14 +401,26 @@
               <div 
                 v-for="(resource, index) in form.resources"
                 :key="index"
-                class="flex items-start space-x-4 p-4 border border-classroom-gray-200 rounded-classroom"
+                class="bg-gray-50 rounded-classroom p-4 border border-gray-200"
               >
-                <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-start justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-900">Resource {{ index + 1 }}</h3>
+                  <button
+                    type="button"
+                    @click="removeResource(index)"
+                    class="text-gray-400 hover:text-red-500 transition-colors"
+                    aria-label="Remove resource"
+                  >
+                    <span class="material-icons text-lg">delete</span>
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-classroom-gray-900 mb-2">Type</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
                     <select
                       v-model="resource.type"
-                      class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                      class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors appearance-none"
                     >
                       <option value="link">Link</option>
                       <option value="file">File</option>
@@ -362,68 +430,60 @@
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-classroom-gray-900 mb-2">Title</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
                     <input
                       v-model="resource.title"
                       type="text"
                       placeholder="Resource title"
-                      class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                      class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     >
                   </div>
 
                   <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-classroom-gray-900 mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
                       {{ getResourcePlaceholder(resource.type) }}
                     </label>
                     <input
                       v-model="resource.url"
                       type="text"
                       :placeholder="getResourcePlaceholder(resource.type)"
-                      class="w-full px-3 py-2 border border-classroom-gray-300 rounded-classroom focus:border-classroom-primary focus:outline-none transition-colors focus-classroom"
+                      class="w-full p-3 border border-gray-300 rounded-classroom focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     >
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  @click="removeResource(index)"
-                  class="p-2 text-classroom-gray-400 hover:text-red-500 transition-colors focus-classroom"
-                  aria-label="Remove resource"
-                >
-                  <span class="material-icons">delete</span>
-                </button>
               </div>
 
-              <div v-if="form.resources.length === 0" class="text-center py-8 text-classroom-gray-500">
-                <span class="material-icons text-4xl mb-2 opacity-50">attach_file</span>
-                <p>No resources added yet</p>
-                <p class="text-sm">Add links or files that students will need for this class</p>
+              <div v-if="form.resources.length === 0" class="text-center py-8 text-gray-500 bg-gray-50 rounded-classroom border-2 border-dashed border-gray-300">
+                <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span class="material-icons text-gray-400 text-2xl">attach_file</span>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No resources added</h3>
+                <p class="text-gray-500">Add links or files that students will need for this class</p>
               </div>
             </div>
-          </div>
 
-          <!-- Step Navigation -->
-          <div class="flex items-center justify-end space-x-4 pt-6">
-            <button
-              type="button"
-              @click="prevStep"
-              class="btn-outline flex items-center space-x-2"
-            >
-              <span class="material-icons text-lg">arrow_back</span>
-              <span>Previous</span>
-            </button>
-            <button
-              type="submit"
-              :disabled="loading"
-              class="btn-primary flex items-center space-x-2"
-              :class="{ 'opacity-50 cursor-not-allowed': loading }"
-            >
-              <span v-if="loading" class="material-icons animate-spin">refresh</span>
-              <span>{{ loading ? 'Creating...' : 'Create Class' }}</span>
-            </button>
+            <!-- Step Navigation -->
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                @click="prevStep"
+                class="px-6 py-3 border border-gray-300 text-gray-700 rounded-classroom hover:bg-gray-50 transition-colors flex items-center space-x-2"
+              >
+                <span class="material-icons text-sm">arrow_back</span>
+                <span>Previous</span>
+              </button>
+              <button
+                type="submit"
+                :disabled="loading"
+                class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-classroom transition-all duration-200 shadow-lg transform hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span v-if="loading" class="material-icons text-sm animate-spin">refresh</span>
+                <span>{{ loading ? 'Creating...' : 'Create Class' }}</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 </template>
@@ -431,13 +491,8 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useClassesStore } from '../../store/classes'
-import { useUsersStore } from '../../store/users'
 
 const router = useRouter()
-const classesStore = useClassesStore()
-const usersStore = useUsersStore()
-
 const loading = ref(false)
 const currentStep = ref(1)
 
@@ -465,7 +520,8 @@ const form = reactive({
   settings: {
     allowStudentPosts: true,
     allowStudentComments: true,
-    showDeletedItems: false
+    showDeletedItems: false,
+    autoEnrollStudents: true
   },
   resources: []
 })
@@ -477,6 +533,8 @@ const errors = reactive({
   startAt: '',
   durationMinutes: ''
 })
+
+const currentUser = JSON.parse(localStorage.getItem('mock:currentUser') || '{}')
 
 // Computed properties for step validation
 const isStep1Valid = computed(() => {
@@ -503,27 +561,27 @@ const prevStep = () => {
 // Step styling
 const getStepClass = (stepId) => {
   if (stepId < currentStep.value) {
-    return 'bg-classroom-primary text-white'
+    return 'bg-green-500 text-white'
   } else if (stepId === currentStep.value) {
-    return 'bg-classroom-primary text-white'
+    return 'bg-blue-600 text-white'
   } else {
-    return 'bg-classroom-gray-100 text-classroom-gray-500'
+    return 'bg-gray-200 text-gray-500'
   }
 }
 
 const getStepTextClass = (stepId) => {
   if (stepId <= currentStep.value) {
-    return 'text-classroom-gray-900'
+    return 'text-gray-900'
   } else {
-    return 'text-classroom-gray-500'
+    return 'text-gray-500'
   }
 }
 
 const getStepLineClass = (stepId) => {
   if (stepId < currentStep.value) {
-    return 'bg-classroom-primary'
+    return 'bg-green-500'
   } else {
-    return 'bg-classroom-gray-200'
+    return 'bg-gray-300'
   }
 }
 
@@ -593,40 +651,21 @@ const createClass = async () => {
 
   loading.value = true
   try {
-    const currentUser = usersStore.currentUser
+    const id = 'c' + Date.now()
     const classData = {
+      id,
       ...form,
       teacherId: currentUser.id,
       resources: form.resources.filter(r => r.title && r.url),
       status: 'scheduled',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      students: []
     }
 
-    const newClass = await classesStore.createClass(classData)
-    
-    // Also create a corresponding course for the dashboard
-    const courseData = {
-      id: `course_${Date.now()}`,
-      name: form.title,
-      section: form.subject,
-      description: form.description,
-      room: 'Virtual Classroom',
-      subject: form.subject,
-      gradeLevel: form.gradeLevel,
-      level: form.level,
-      color: getRandomColor(),
-      teachers: [currentUser.id],
-      students: [],
-      code: generateClassCode(form.subject),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    
-    // Save course to localStorage for immediate dashboard update
-    const savedCourses = localStorage.getItem('courses')
-    const courses = savedCourses ? JSON.parse(savedCourses) : []
-    courses.push(courseData)
-    localStorage.setItem('courses', JSON.stringify(courses))
+    // Save to localStorage using the teacher classes store pattern
+    const classes = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+    classes.unshift(classData)
+    localStorage.setItem('mock:classes', JSON.stringify(classes))
     
     showToast('Class created successfully!')
     router.push('/teacher/classes')
@@ -636,17 +675,6 @@ const createClass = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const getRandomColor = () => {
-  const colors = ['#4285F4', '#34A853', '#FBBC05', '#EA4335', '#8E44AD', '#2ECC71', '#E74C3C', '#1ABC9C']
-  return colors[Math.floor(Math.random() * colors.length)]
-}
-
-const generateClassCode = (subject) => {
-  const prefix = subject.substring(0, 3).toUpperCase()
-  const randomNum = Math.floor(Math.random() * 900) + 100
-  return `${prefix}${randomNum}`
 }
 
 onMounted(() => {
@@ -661,6 +689,12 @@ onMounted(() => {
 const showToast = (message) => {
   if (window.showToast) {
     window.showToast(message)
+  } else {
+    alert(message)
   }
 }
 </script>
+
+<style scoped>
+/* Custom styles for enhanced visual appeal */
+</style>

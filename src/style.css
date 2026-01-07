@@ -15,6 +15,17 @@ body {
   font-family: 'Roboto', sans-serif;
   background-color: #f8f9fa;
   color: #202124;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode styles */
+.dark body {
+  background-color: #1a1a1a;
+  color: #e5e5e5;
+}
+
+.dark {
+  color-scheme: dark;
 }
 
 /* Custom utility classes */
@@ -96,4 +107,143 @@ body {
   width: 1px;
   height: 1px;
   overflow: hidden;
+}
+
+/* Animation utilities */
+.animate-hover-lift {
+  @apply transition-all duration-300 ease-out;
+}
+
+.animate-hover-lift:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+.animate-press {
+  @apply transition-transform duration-150 ease-out;
+}
+
+.animate-press:active {
+  @apply transform scale-95;
+}
+
+.animate-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+}
+
+.animate-ripple:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0) translate(-50%, -50%);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20) translate(-50%, -50%);
+    opacity: 0;
+  }
+}
+
+/* Page transition animations */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.3s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+/* Modal transition animations */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.modal-backdrop-enter-active,
+.modal-backdrop-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-backdrop-enter-from,
+.modal-backdrop-leave-to {
+  opacity: 0;
+}
+
+/* List item animations */
+.list-item-enter-active,
+.list-item-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-item-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.list-item-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.list-item-leave-active {
+  position: absolute;
+}
+
+/* Notification animations */
+.notification-enter-active,
+.notification-leave-active {
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.notification-enter-from {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.notification-leave-to {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+/* Loading spinner animation */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

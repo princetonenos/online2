@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic: menu_book
+    - generic:
+      - generic: auto_stories
+    - generic:
+      - generic: book
+    - generic:
+      - generic: edit
+    - generic:
+      - generic: create
+    - generic:
+      - generic: dashboard
+    - generic:
+      - generic: assignment
+    - generic:
+      - generic: school
+    - generic:
+      - generic: person
+    - generic:
+      - generic: groups
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e9]: school
+      - heading "Welcome Back" [level=1] [ref=e10]
+      - paragraph [ref=e11]: Sign in to continue your learning journey
+      - generic [ref=e12]:
+        - generic [ref=e13]: verified_user
+        - generic [ref=e14]: Secure Login
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: Email Address
+        - generic [ref=e18]:
+          - generic:
+            - generic: email
+          - textbox "Enter your email" [ref=e19]
+      - generic [ref=e20]:
+        - generic [ref=e22]: Password
+        - generic [ref=e23]:
+          - generic:
+            - generic: lock
+          - textbox "Enter your password" [ref=e24]
+          - button "visibility" [ref=e25] [cursor=pointer]:
+            - generic [ref=e26]: visibility
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - checkbox "Remember me for 30 days" [checked] [ref=e29] [cursor=pointer]
+          - generic [ref=e30] [cursor=pointer]: Remember me for 30 days
+        - button "Forgot password?" [ref=e31] [cursor=pointer]
+      - button "Sign In Securely" [ref=e32] [cursor=pointer]:
+        - generic [ref=e33]: Sign In Securely
+    - generic [ref=e38]: Quick Access
+    - generic [ref=e39]:
+      - button "admin_panel_settings Admin" [active] [ref=e40] [cursor=pointer]:
+        - generic [ref=e41]: admin_panel_settings
+        - text: Admin
+      - button "school Teacher" [ref=e42] [cursor=pointer]:
+        - generic [ref=e43]: school
+        - text: Teacher
+      - button "person Student" [ref=e44] [cursor=pointer]:
+        - generic [ref=e45]: person
+        - text: Student
+```

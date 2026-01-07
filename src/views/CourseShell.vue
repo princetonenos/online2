@@ -1,4 +1,5 @@
-<template>
+Course not found
+The course you're looking for doesn't exist or you don't have access.<template>
   <div v-if="loading" class="p-6">
     <div class="skeleton h-32 w-full mb-6 rounded-classroom"></div>
     <div class="skeleton h-12 w-full mb-8 rounded-classroom"></div>
@@ -108,11 +109,11 @@
                     {{ assignment.title }}
                   </h4>
                   <p class="text-xs text-classroom-gray-500 mb-2">
-                    Due {{ formatDueDate(assignment.dueDate) }}
+                    Due {{ formatDueDate(assignment) }}
                   </p>
                   <div class="flex items-center justify-between">
-                    <span class="chip text-xs" :class="getPointsClass(assignment.points)">
-                      {{ assignment.points }} points
+                    <span class="chip text-xs" :class="getPointsClass(assignment.maxPoints || assignment.points || 100)">
+                      {{ assignment.maxPoints || assignment.points || 100 }} points
                     </span>
                     <span class="material-icons text-classroom-gray-400 text-sm">chevron_right</span>
                   </div>
@@ -172,15 +173,12 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCoursesStore } from '../store/courses'
-import { useAssignmentsStore } from '../store/assignments'
 
 const route = useRoute()
 const router = useRouter()
-const coursesStore = useCoursesStore()
-const assignmentsStore = useAssignmentsStore()
 
 const loading = ref(true)
+const courseData = ref(null)
 
 const tabs = [
   { name: 'Stream', path: 'stream' },
@@ -189,22 +187,61 @@ const tabs = [
   { name: 'Grades', path: 'grades' }
 ]
 
-const course = computed(() => {
-  return coursesStore.getCourseById(route.params.id)
-})
+// Load course from localStorage
+function loadCourse() {
+  const allClasses = JSON.parse(localStorage.getItem('mock:classes') || '[]')
+  const foundClass = allClasses.find(c => c.id === route.params.id)
+  
+  if (foundClass) {
+    // Map class data to course format
+    courseData.value = {
+      id: foundClass.id,
+      name: foundClass.title,
+      section: foundClass.level || 'General',
+      code: foundClass.code || 'N/A',
+      subject: foundClass.subject || 'General',
+      room: 'Online',
+      color: getClassColor(foundClass.subject),
+      ...foundClass
+    }
+  } else {
+    courseData.value = null
+  }
+}
+
+function getClassColor(subject) {
+  const colors = {
+    'Mathematics': '#1976D2',
+    'Science': '#388E3C',
+    'English': '#D32F2F',
+    'History': '#F57C00',
+    'Art': '#7B1FA2',
+    'Music': '#C2185B',
+    'Physical Education': '#0097A7'
+  }
+  return colors[subject] || '#5C6BC0'
+}
+
+const course = computed(() => courseData.value)
 
 const upcomingAssignments = computed(() => {
   if (!course.value) return []
-  const assignments = assignmentsStore.assignments.filter(assignment => 
-    assignment.courseId === course.value.id && 
-    new Date(assignment.dueDate) > new Date()
+  
+  const allAssignments = JSON.parse(localStorage.getItem('mock:assignments') || '[]')
+  const assignments = allAssignments.filter(assignment => 
+    assignment.classId === course.value.id && 
+    new Date(assignment.dueAt || assignment.dueDate) > new Date()
   )
+  
   return assignments
-    .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+    .sort((a, b) => new Date(a.dueAt || a.dueDate) - new Date(b.dueAt || b.dueDate))
     .slice(0, 3)
 })
 
-const formatDueDate = (dueDate) => {
+const formatDueDate = (assignment) => {
+  const dueDate = assignment.dueAt || assignment.dueDate
+  if (!dueDate) return 'No due date'
+  
   const date = new Date(dueDate)
   const now = new Date()
   const diffTime = date.getTime() - now.getTime()
@@ -236,17 +273,15 @@ const copyClassCode = () => {
 }
 
 const navigateToAssignment = (assignment) => {
-  router.push(`/course/${assignment.courseId}/assignments/${assignment.id}`)
+  router.push(`/course/${assignment.classId || assignment.courseId}/assignments/${assignment.id}`)
 }
 
 const loadCourseData = async () => {
   loading.value = true
   try {
-    await Promise.all([
-      coursesStore.loadCourses(),
-      assignmentsStore.loadAssignments()
-    ])
-    coursesStore.setCurrentCourse(route.params.id)
+    // Small delay to simulate loading
+    await new Promise(resolve => setTimeout(resolve, 300))
+    loadCourse()
   } catch (error) {
     console.error('Error loading course data:', error)
     showToast('Error loading course information')
